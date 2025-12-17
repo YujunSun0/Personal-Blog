@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>기술 블로그 - 메인 페이지 목업</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* 컬러 시스템 */
+      --color-primary: #3B82F6;
+      --color-primary-hover: #2563EB;
+      --color-primary-light: #DBEAFE;
+      
+      --color-text-primary: #171717;
+      --color-text-secondary: #525252;
+      --color-text-tertiary: #A3A3A3;
+      
+      --color-bg-primary: #FFFFFF;
+      --color-bg-secondary: #F9FAFB;
+      --color-bg-tertiary: #F3F4F6;
+      
+      --color-border: #E5E7EB;
+      --color-border-hover: #D1D5DB;
+      
+      /* 글 타입별 컬러 */
+      --color-type-tech: #3B82F6;
+      --color-type-tech-bg: #DBEAFE;
+      --color-type-trouble: #F59E0B;
+      --color-type-trouble-bg: #FEF3C7;
+      --color-type-life: #10B981;
+      --color-type-life-bg: #D1FAE5;
+      
+      /* 간격 */
+      --spacing-4: 1rem;
+      --spacing-6: 1.5rem;
+      --spacing-8: 2rem;
+      --spacing-12: 3rem;
+      --spacing-16: 4rem;
+      
+      /* 컨테이너 */
+      --container-max-width: 1400px;
+      --container-padding-x: 2rem;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 
+                   'Malgun Gothic', 'Apple SD Gothic Neo', Roboto, sans-serif;
+      color: var(--color-text-primary);
+      background-color: var(--color-bg-primary);
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      background-color: var(--color-bg-primary);
+      border-bottom: 1px solid var(--color-border);
+      z-index: 100;
+      height: 64px;
+    }
+
+    .header-container {
+      max-width: var(--container-max-width);
+      margin: 0 auto;
+      padding: 0 var(--container-padding-x);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    @media (max-width: 1400px) {
+      :root {
+        --container-padding-x: 1.5rem;
+      }
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+
+    .nav {
+      display: flex;
+      gap: var(--spacing-6);
+      align-items: center;
+    }
+
+    .nav-link {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+      color: var(--color-primary);
+    }
+
+    /* Main Container */
+    .main-container {
+      max-width: var(--container-max-width);
+      margin: 0 auto;
+      padding: var(--spacing-8) var(--container-padding-x);
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: var(--spacing-12);
+    }
+
+    /* Tag Filter Sidebar */
+    .tag-sidebar {
+      position: sticky;
+      top: 80px;
+      height: fit-content;
+    }
+
+    .tag-section-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--spacing-4);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tag-list {
+      list-style: none;
+    }
+
+    .tag-item {
+      margin-bottom: var(--spacing-4);
+    }
+
+    .tag-button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .tag-button:hover {
+      background-color: var(--color-bg-secondary);
+      color: var(--color-text-primary);
+    }
+
+    .tag-button.active {
+      background-color: var(--color-primary-light);
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+
+    .tag-count {
+      color: var(--color-text-tertiary);
+      font-size: 0.75rem;
+    }
+
+    .tag-button.active .tag-count {
+      color: var(--color-primary);
+    }
+
+    /* Post List */
+    .post-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-8);
+    }
+
+    /* Post Card - 가로형 레이아웃 */
+    .post-card {
+      display: flex;
+      gap: var(--spacing-6);
+      padding: var(--spacing-6);
+      background-color: var(--color-bg-primary);
+      border: 1px solid var(--color-border);
+      border-radius: 0.75rem;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .post-card:hover {
+      border-color: var(--color-border-hover);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transform: translateX(4px);
+    }
+
+    .post-thumbnail {
+      flex-shrink: 0;
+      width: 280px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 0.5rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.875rem;
+    }
+
+    .post-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
+    }
+
+    .post-header {
+      margin-bottom: var(--spacing-4);
+    }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      margin-bottom: var(--spacing-3);
+      flex-wrap: wrap;
+    }
+
+    .post-type-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .post-type-tech {
+      background-color: var(--color-type-tech-bg);
+      color: var(--color-type-tech);
+    }
+
+    .post-type-trouble {
+      background-color: var(--color-type-trouble-bg);
+      color: var(--color-type-trouble);
+    }
+
+    .post-type-life {
+      background-color: var(--color-type-life-bg);
+      color: var(--color-type-life);
+    }
+
+    .post-tags {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .post-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background-color: var(--color-bg-secondary);
+      color: var(--color-text-secondary);
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .post-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-3);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .post-description {
+      font-size: 0.9375rem;
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+      margin-bottom: var(--spacing-4);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .post-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+    }
+
+    .post-date {
+      font-size: 0.875rem;
+      color: var(--color-text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: var(--spacing-16);
+      padding: var(--spacing-8) var(--container-padding-x);
+      background-color: var(--color-bg-secondary);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .footer-container {
+      max-width: var(--container-max-width);
+      margin: 0 auto;
+      text-align: center;
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+    }
+
+    /* 반응형 */
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 1fr;
+      }
+
+      .tag-sidebar {
+        position: static;
+        margin-bottom: var(--spacing-8);
+      }
+
+      .tag-list {
+        display: flex;
+        gap: var(--spacing-4);
+        overflow-x: auto;
+        padding-bottom: var(--spacing-4);
+      }
+
+      .tag-item {
+        margin-bottom: 0;
+        flex-shrink: 0;
+      }
+
+    }
+
+    @media (max-width: 768px) {
+      .post-card {
+        flex-direction: column;
+      }
+
+      .post-thumbnail {
+        width: 100%;
+        height: 200px;
+      }
+
+      .nav {
+        gap: var(--spacing-4);
+      }
+
+      .nav-link {
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-container">
+      <a href="/" class="logo">기술 블로그</a>
+      <nav class="nav">
+        <a href="/" class="nav-link">홈</a>
+        <a href="/about" class="nav-link">소개</a>
+        <a href="/tags" class="nav-link">태그</a>
+        <button class="nav-link" style="background: none; border: none; cursor: pointer;">🌙</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Tag Filter Sidebar -->
+    <aside class="tag-sidebar">
+      <h2 class="tag-section-title">태그</h2>
+      <ul class="tag-list">
+        <li class="tag-item">
+          <button class="tag-button active">
+            <span>전체</span>
+            <span class="tag-count">24</span>
+          </button>
+        </li>
+        <li class="tag-item">
+          <button class="tag-button">
+            <span>React</span>
+            <span class="tag-count">8</span>
+          </button>
+        </li>
+        <li class="tag-item">
+          <button class="tag-button">
+            <span>TypeScript</span>
+            <span class="tag-count">6</span>
+          </button>
+        </li>
+        <li class="tag-item">
+          <button class="tag-button">
+            <span>Next.js</span>
+            <span class="tag-count">5</span>
+          </button>
+        </li>
+        <li class="tag-item">
+          <button class="tag-button">
+            <span>JavaScript</span>
+            <span class="tag-count">4</span>
+          </button>
+        </li>
+        <li class="tag-item">
+          <button class="tag-button">
+            <span>CSS</span>
+            <span class="tag-count">3</span>
+          </button>
+        </li>
+        <li class="tag-item">
+          <button class="tag-button">
+            <span>알고리즘</span>
+            <span class="tag-count">3</span>
+          </button>
+        </li>
+        <li class="tag-item">
+          <button class="tag-button">
+            <span>TIL</span>
+            <span class="tag-count">2</span>
+          </button>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Post List -->
+    <section class="post-list">
+      <!-- Post Card 1 -->
+      <article class="post-card">
+        <div class="post-thumbnail">썸네일 이미지</div>
+        <div class="post-content">
+          <div class="post-header">
+            <div class="post-meta">
+              <span class="post-type-badge post-type-tech">TECH</span>
+              <div class="post-tags">
+                <span class="post-tag">React</span>
+                <span class="post-tag">TypeScript</span>
+              </div>
+            </div>
+            <h3 class="post-title">Next.js 14 App Router로 마이그레이션하기</h3>
+            <p class="post-description">
+              Next.js 13의 Pages Router에서 App Router로 마이그레이션하면서 겪은 경험과 
+              트러블슈팅 과정을 공유합니다. Server Components와 Client Components의 차이점부터 
+              실제 적용 사례까지 상세히 다룹니다.
+            </p>
+          </div>
+          <div class="post-footer">
+            <div class="post-date">2024년 1월 15일</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Post Card 2 -->
+      <article class="post-card">
+        <div class="post-thumbnail">썸네일 이미지</div>
+        <div class="post-content">
+          <div class="post-header">
+            <div class="post-meta">
+              <span class="post-type-badge post-type-trouble">TROUBLESHOOTING</span>
+              <div class="post-tags">
+                <span class="post-tag">CSS</span>
+                <span class="post-tag">Tailwind</span>
+              </div>
+            </div>
+            <h3 class="post-title">Tailwind CSS v4에서 발생한 PostCSS 플러그인 에러 해결하기</h3>
+            <p class="post-description">
+              Tailwind CSS v4로 업그레이드하면서 마주한 PostCSS 플러그인 에러를 해결한 과정입니다. 
+              @tailwindcss/postcss 패키지 설치부터 설정 변경까지 단계별로 설명합니다.
+            </p>
+          </div>
+          <div class="post-footer">
+            <div class="post-date">2024년 1월 12일</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Post Card 3 -->
+      <article class="post-card">
+        <div class="post-thumbnail">썸네일 이미지</div>
+        <div class="post-content">
+          <div class="post-header">
+            <div class="post-meta">
+              <span class="post-type-badge post-type-life">LIFE</span>
+              <div class="post-tags">
+                <span class="post-tag">일상</span>
+              </div>
+            </div>
+            <h3 class="post-title">2024년 첫 번째 프로젝트 시작</h3>
+            <p class="post-description">
+              새해를 맞아 개인 기술 블로그 프로젝트를 시작했습니다. Next.js와 Supabase를 활용한 
+              풀스택 블로그 구축 과정을 기록하고 있습니다. 앞으로의 계획과 목표를 공유합니다.
+            </p>
+          </div>
+          <div class="post-footer">
+            <div class="post-date">2024년 1월 10일</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Post Card 4 -->
+      <article class="post-card">
+        <div class="post-thumbnail">썸네일 이미지</div>
+        <div class="post-content">
+          <div class="post-header">
+            <div class="post-meta">
+              <span class="post-type-badge post-type-tech">TECH</span>
+              <div class="post-tags">
+                <span class="post-tag">JavaScript</span>
+                <span class="post-tag">알고리즘</span>
+              </div>
+            </div>
+            <h3 class="post-title">배열 메서드 정리: map, filter, reduce 완벽 가이드</h3>
+            <p class="post-description">
+              JavaScript의 배열 메서드 중 가장 많이 사용하는 map, filter, reduce에 대해 
+              실무 예제와 함께 자세히 설명합니다. 각 메서드의 차이점과 언제 사용해야 하는지도 다룹니다.
+            </p>
+          </div>
+          <div class="post-footer">
+            <div class="post-date">2024년 1월 8일</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Post Card 5 -->
+      <article class="post-card">
+        <div class="post-thumbnail">썸네일 이미지</div>
+        <div class="post-content">
+          <div class="post-header">
+            <div class="post-meta">
+              <span class="post-type-badge post-type-tech">TECH</span>
+              <div class="post-tags">
+                <span class="post-tag">TypeScript</span>
+                <span class="post-tag">TIL</span>
+              </div>
+            </div>
+            <h3 class="post-title">TypeScript 제네릭 활용하기</h3>
+            <p class="post-description">
+              TypeScript의 제네릭을 활용하여 재사용 가능한 타입을 만드는 방법을 학습했습니다. 
+              실무에서 자주 사용하는 패턴들을 정리하고 공유합니다.
+            </p>
+          </div>
+          <div class="post-footer">
+            <div class="post-date">2024년 1월 5일</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Post Card 6 -->
+      <article class="post-card">
+        <div class="post-thumbnail">썸네일 이미지</div>
+        <div class="post-content">
+          <div class="post-header">
+            <div class="post-meta">
+              <span class="post-type-badge post-type-trouble">TROUBLESHOOTING</span>
+              <div class="post-tags">
+                <span class="post-tag">React</span>
+              </div>
+            </div>
+            <h3 class="post-title">React Hook 의존성 배열 경고 해결하기</h3>
+            <p class="post-description">
+              useEffect나 useMemo에서 의존성 배열 경고가 발생했을 때 해결하는 방법을 정리했습니다. 
+              ESLint 규칙과 실제 해결 사례를 함께 다룹니다.
+            </p>
+          </div>
+          <div class="post-footer">
+            <div class="post-date">2024년 1월 3일</div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <p>© 2024 기술 블로그. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>
+

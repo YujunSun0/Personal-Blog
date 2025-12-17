@@ -19,11 +19,8 @@ export default async function LoginPage() {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
         <div>
           <h2 className="text-center text-3xl font-bold text-gray-900">
-            관리자 로그인
+            로그인
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            블로그 관리자 페이지에 로그인하세요
-          </p>
         </div>
 
         <div className="space-y-6">
