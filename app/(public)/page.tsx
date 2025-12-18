@@ -1,8 +1,17 @@
 import { getPublishedPosts } from '@/lib/supabase/posts';
+import { getPublishedTagsWithCount } from '@/lib/supabase/tags';
 import { PostCard } from '@/components/post/PostCard';
+import { TagFilter } from '@/components/tag/TagFilter';
+import { PostsList } from '@/components/post/PostsList';
 
-export default async function Home() {
-  const posts = await getPublishedPosts();
+interface HomeProps {
+  searchParams: Promise<{ tag?: string }>;
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+  const { tag } = await searchParams;
+  const posts = await getPublishedPosts(tag || undefined);
+  const tags = await getPublishedTagsWithCount();
 
   return (
     <main className="max-w-[var(--container-max-width)] mx-auto px-[var(--container-padding-x)] py-8">
@@ -15,18 +24,11 @@ export default async function Home() {
         </p>
       </div>
 
+      {/* 태그 필터 */}
+      <TagFilter tags={tags} />
+
       {/* 글 목록 */}
-      <div className="space-y-8">
-        {posts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-[var(--color-text-secondary)]">
-              아직 작성된 글이 없습니다.
-            </p>
-          </div>
-        ) : (
-          posts.map((post) => <PostCard key={post.id} post={post} />)
-        )}
-      </div>
+      <PostsList posts={posts} selectedTag={tag} />
     </main>
   );
 }

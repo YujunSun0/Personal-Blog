@@ -19,6 +19,10 @@ export interface PostListItem {
   type: PostType;
   thumbnailUrl: string | null;
   createdAt: string;
+  tags?: Array<{
+    id: string;
+    name: string;
+  }>;
 }
 
 export interface PostWithTags extends Post {

@@ -53,21 +53,79 @@ function mapPostToInsert(post: Omit<Post, 'id' | 'createdAt' | 'updatedAt'>): Po
 
 /**
  * 공개된 글 목록 조회 (is_published = true)
+ * 태그 정보 포함
  */
-export async function getPublishedPosts(): Promise<PostListItem[]> {
+export async function getPublishedPosts(tagName?: string): Promise<PostListItem[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  let postIds: string[] | undefined;
+
+  // 태그 필터링이 있는 경우
+  if (tagName) {
+    // 먼저 태그 ID 찾기
+    const { data: tagData, error: tagError } = await supabase
+      .from('tags')
+      .select('id')
+      .eq('name', tagName)
+      .single();
+
+    if (tagError || !tagData) {
+      return []; // 태그가 없으면 빈 배열 반환
+    }
+
+    // 해당 태그가 연결된 글 ID 찾기
+    const { data: postTagsData, error: postTagsError } = await supabase
+      .from('post_tags')
+      .select('post_id')
+      .eq('tag_id', tagData.id);
+
+    if (postTagsError || !postTagsData || postTagsData.length === 0) {
+      return [];
+    }
+
+    postIds = postTagsData.map((pt) => pt.post_id);
+  }
+
+  // 글 조회
+  let query = supabase
     .from('posts')
     .select('*')
-    .eq('is_published', true)
-    .order('created_at', { ascending: false });
+    .eq('is_published', true);
+
+  if (postIds) {
+    query = query.in('id', postIds);
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
 
   if (error) {
     throw new Error(`Failed to fetch published posts: ${error.message}`);
   }
 
-  return data.map(mapPostRowToPostListItem);
+  // 각 글의 태그 조회
+  const postsWithTags = await Promise.all(
+    data.map(async (post) => {
+      const { data: postTags } = await supabase
+        .from('post_tags')
+        .select(`
+          tag_id,
+          tags(id, name)
+        `)
+        .eq('post_id', post.id);
+
+      const tags = postTags?.map((pt: any) => ({
+        id: pt.tags.id,
+        name: pt.tags.name,
+      })) || [];
+
+      return {
+        ...mapPostRowToPostListItem(post),
+        tags,
+      };
+    })
+  );
+
+  return postsWithTags;
 }
 
 /**

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { updatePost, deletePost, getPostById } from '@/lib/supabase/posts';
-import { connectPostToTags } from '@/lib/supabase/tags';
+import { updateTag, deleteTag } from '@/lib/supabase/tags';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -20,21 +19,18 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     const { id } = await params;
     const body = await request.json();
-    const { tags, ...postData } = body;
-    
-    const post = await updatePost(id, postData);
+    const { name } = body;
 
-    // 태그 연결 업데이트
-    if (tags !== undefined) {
-      const tagNames = Array.isArray(tags) ? tags : [];
-      await connectPostToTags(id, tagNames);
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return NextResponse.json({ error: 'Tag name is required' }, { status: 400 });
     }
 
-    return NextResponse.json(post);
+    const tag = await updateTag(id, name);
+    return NextResponse.json(tag);
   } catch (error) {
-    console.error('Error updating post:', error);
+    console.error('Error updating tag:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to update post' },
+      { error: error instanceof Error ? error.message : 'Failed to update tag' },
       { status: 500 }
     );
   }
@@ -52,16 +48,14 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     }
 
     const { id } = await params;
-    await deletePost(id);
-
+    await deleteTag(id);
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting post:', error);
+    console.error('Error deleting tag:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to delete post' },
+      { error: error instanceof Error ? error.message : 'Failed to delete tag' },
       { status: 500 }
     );
   }
 }
-
 

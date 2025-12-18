@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createPost } from '@/lib/supabase/posts';
+import { connectPostToTags } from '@/lib/supabase/tags';
 
 export async function POST(request: Request) {
   try {
@@ -14,7 +15,14 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const post = await createPost(body);
+    const { tags, ...postData } = body;
+    
+    const post = await createPost(postData);
+
+    // 태그 연결
+    if (tags && Array.isArray(tags) && tags.length > 0) {
+      await connectPostToTags(post.id, tags);
+    }
 
     return NextResponse.json(post, { status: 201 });
   } catch (error) {

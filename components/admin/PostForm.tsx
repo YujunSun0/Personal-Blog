@@ -86,14 +86,13 @@ export function PostForm({ initialData, postId }: PostFormProps) {
       const url = postId ? `/api/posts/${postId}` : '/api/posts';
       const method = postId ? 'PUT' : 'POST';
 
-      const { tags, ...postData } = formData;
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...postData,
+          ...formData,
           isPublished: false,
         }),
       });
@@ -120,14 +119,13 @@ export function PostForm({ initialData, postId }: PostFormProps) {
       const url = postId ? `/api/posts/${postId}` : '/api/posts';
       const method = postId ? 'PUT' : 'POST';
 
-      const { tags, ...postData } = formData;
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...postData,
+          ...formData,
           isPublished: true,
         }),
       });

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { PostListItem } from '@/types/post';
+import { TagBadge } from '@/components/tag/TagBadge';
 
 interface PostCardProps {
   post: PostListItem;
@@ -66,6 +67,20 @@ export function PostCard({ post, href }: PostCardProps) {
               <p className="text-[var(--color-text-secondary)] text-[0.9375rem] leading-relaxed line-clamp-2 mb-4">
                 {post.description}
               </p>
+            )}
+
+            {/* 태그 */}
+            {post.tags && post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {post.tags.slice(0, 3).map((tag) => (
+                  <TagBadge key={tag.id} name={tag.name} size="sm" />
+                ))}
+                {post.tags.length > 3 && (
+                  <span className="text-xs text-[var(--color-text-tertiary)]">
+                    +{post.tags.length - 3}
+                  </span>
+                )}
+              </div>
             )}
           </div>
 
