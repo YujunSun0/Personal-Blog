@@ -9,3 +9,18 @@ export interface LoginFormErrors {
   general?: string;
 }
 
+export interface SignupFormData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  nickname: string;
+}
+
+export interface SignupFormErrors {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  nickname?: string;
+  general?: string;
+}
+

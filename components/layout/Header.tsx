@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AuthButtons } from './AuthButtons';
 
 export function Header() {
   return (
@@ -35,6 +36,9 @@ export function Header() {
           >
             🌙
           </button>
+          <div className="ml-2 pl-4">
+            <AuthButtons />
+          </div>
         </nav>
       </div>
     </header>

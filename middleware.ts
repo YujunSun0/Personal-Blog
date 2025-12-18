@@ -34,22 +34,47 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 관리자 페이지 접근 시 인증 확인
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
+  const pathname = request.nextUrl.pathname;
+
+  // 관리자 페이지 접근 시 인증 및 관리자 권한 확인
+  if (pathname.startsWith('/dashboard')) {
     if (!user) {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = '/login';
-      redirectUrl.searchParams.set('redirectedFrom', request.nextUrl.pathname);
-      return NextResponse.redirect(redirectUrl);
+      redirectUrl.pathname = '/auth/login';
+      redirectUrl.searchParams.set('redirectedFrom', pathname);
+      const redirectResponse = NextResponse.redirect(redirectUrl);
+      // 쿠키 복사
+      supabaseResponse.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+      });
+      return redirectResponse;
+    }
+
+    // 관리자 권한 확인
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!profile || profile.role !== 'admin') {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = '/';
+      redirectUrl.searchParams.set('error', 'unauthorized');
+      const redirectResponse = NextResponse.redirect(redirectUrl);
+      // 쿠키 복사
+      supabaseResponse.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+      });
+      return redirectResponse;
     }
   }
 
-  // 로그인 페이지 접근 시 이미 로그인되어 있으면 대시보드로 리다이렉트
-  if (request.nextUrl.pathname.startsWith('/login')) {
-    if (user) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-  }
+  // 로그인 페이지는 middleware에서 리다이렉트하지 않음 (페이지 컴포넌트에서 처리)
+  // 무한 루프 방지를 위해 여기서는 처리하지 않음
+
+  // 레이아웃에서 경로를 확인할 수 있도록 헤더 설정
+  supabaseResponse.headers.set('x-pathname', pathname);
 
   return supabaseResponse;
 }

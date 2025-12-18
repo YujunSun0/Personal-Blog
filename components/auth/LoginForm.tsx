@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import type { LoginFormData, LoginFormErrors } from '@/types/auth';
 import { validateLoginForm } from '@/lib/auth/validation';
@@ -13,7 +14,7 @@ export function LoginForm() {
   });
   const [errors, setErrors] = useState<LoginFormErrors>({});
   const [loading, setLoading] = useState(false);
-  const { signInWithEmail } = useAuth();
+  const { signInWithEmail, role } = useAuth();
   const router = useRouter();
 
   const handleValidate = (): boolean => {
@@ -53,11 +54,30 @@ export function LoginForm() {
     const { error } = await signInWithEmail(formData.email, formData.password);
 
     if (error) {
+      toast.error('로그인 실패', {
+        description: error.message,
+      });
       setErrors({ general: error.message });
       setLoading(false);
     } else {
-      router.push('/dashboard');
-      router.refresh();
+      toast.success('로그인 성공', {
+        description: '환영합니다!',
+      });
+      // 역할이 로드될 때까지 잠시 대기 후 리다이렉트
+      setTimeout(() => {
+        // URL 파라미터에서 리다이렉트 경로 확인
+        const searchParams = new URLSearchParams(window.location.search);
+        const redirectedFrom = searchParams.get('redirectedFrom');
+        
+        // 관리자인 경우 대시보드로, 일반 사용자는 홈으로
+        // 또는 리다이렉트 경로가 관리자 페이지인 경우에만 대시보드로
+        if (redirectedFrom && redirectedFrom.startsWith('/dashboard')) {
+          router.push('/dashboard');
+        } else {
+          router.push('/');
+        }
+        router.refresh();
+      }, 500);
     }
   };
 

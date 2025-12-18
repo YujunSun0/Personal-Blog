@@ -139,6 +139,32 @@ export interface Database {
           updated_at?: string;
         };
       };
+      profiles: {
+        Row: {
+          id: string;
+          user_id: string;
+          nickname: string | null;
+          role: 'user' | 'admin';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          nickname?: string | null;
+          role?: 'user' | 'admin';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          nickname?: string | null;
+          role?: 'user' | 'admin';
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;

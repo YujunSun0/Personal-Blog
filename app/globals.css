@@ -85,3 +85,178 @@ body {
   }
 }
 
+/* Markdown 콘텐츠 스타일 */
+.markdown-content {
+  @apply text-[var(--color-text-primary)];
+}
+
+.markdown-content blockquote {
+  @apply whitespace-pre-line;
+}
+
+.markdown-content blockquote p {
+  @apply mb-1;
+}
+
+.markdown-content blockquote p:last-child {
+  @apply mb-0;
+}
+
+/* 리스트 스타일 개선 */
+.markdown-content ul,
+.markdown-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.markdown-content li {
+  margin-bottom: 0.25rem;
+  line-height: 1.6;
+}
+
+/* 중첩 리스트 스타일 */
+.markdown-content li > ul,
+.markdown-content li > ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* 리스트 안의 코드 블록 */
+.markdown-content li > pre {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* 리스트 안의 문단 */
+.markdown-content li > p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-content li > p:first-child {
+  margin-top: 0;
+}
+
+.markdown-content li > p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content pre {
+  @apply bg-[var(--color-bg-secondary)] rounded-lg p-4 overflow-x-auto my-4;
+  white-space: pre;
+}
+
+.markdown-content pre code {
+  @apply bg-transparent p-0;
+  color: inherit;
+  white-space: pre;
+  display: block;
+}
+
+.markdown-content code {
+  @apply bg-[var(--color-bg-secondary)] px-1.5 py-0.5 rounded text-sm font-mono;
+  display: inline;
+}
+
+/* 인라인 코드는 인라인으로 표시 */
+.markdown-content p code,
+.markdown-content li code,
+.markdown-content td code,
+.markdown-content th code {
+  display: inline;
+  vertical-align: baseline;
+}
+
+/* 코드 블록 내부의 리스트나 다른 요소가 파싱되지 않도록 */
+.markdown-content pre code * {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Highlight.js 코드 블록 스타일 조정 */
+.markdown-content .hljs {
+  @apply bg-[var(--color-bg-secondary)] rounded-lg p-4;
+  color: var(--color-text-primary);
+}
+
+.markdown-content .hljs-comment,
+.markdown-content .hljs-quote {
+  color: var(--color-text-tertiary);
+}
+
+.markdown-content .hljs-keyword,
+.markdown-content .hljs-selector-tag,
+.markdown-content .hljs-subst {
+  color: #3b82f6;
+}
+
+.markdown-content .hljs-number,
+.markdown-content .hljs-literal,
+.markdown-content .hljs-variable,
+.markdown-content .hljs-template-variable,
+.markdown-content .hljs-tag .hljs-attr {
+  color: #10b981;
+}
+
+.markdown-content .hljs-string,
+.markdown-content .hljs-doctag {
+  color: #f59e0b;
+}
+
+.markdown-content .hljs-title,
+.markdown-content .hljs-section,
+.markdown-content .hljs-selector-id {
+  color: #ef4444;
+}
+
+.markdown-content .hljs-type,
+.markdown-content .hljs-class .hljs-title {
+  color: #8b5cf6;
+}
+
+.markdown-content .hljs-tag,
+.markdown-content .hljs-name,
+.markdown-content .hljs-attribute {
+  color: #3b82f6;
+}
+
+.markdown-content .hljs-regexp,
+.markdown-content .hljs-link {
+  color: #10b981;
+}
+
+.markdown-content .hljs-symbol,
+.markdown-content .hljs-bullet {
+  color: #f59e0b;
+}
+
+.markdown-content .hljs-built_in,
+.markdown-content .hljs-builtin-name {
+  color: #8b5cf6;
+}
+
+.markdown-content .hljs-meta {
+  color: var(--color-text-tertiary);
+}
+
+.markdown-content .hljs-deletion {
+  background: #fee2e2;
+}
+
+.markdown-content .hljs-addition {
+  background: #d1fae5;
+}
+
+.markdown-content .hljs-emphasis {
+  font-style: italic;
+}
+
+.markdown-content .hljs-strong {
+  font-weight: bold;
+}
+
+button {
+  cursor: pointer;
+}
