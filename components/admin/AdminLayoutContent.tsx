@@ -58,12 +58,12 @@ export function AdminLayoutContent({ userEmail, children }: AdminLayoutContentPr
                 >
                   글 작성
                 </Link>
-                <Link
-                  href="/dashboard/tags"
-                  className="block px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-bg-secondary)] rounded-md transition-colors whitespace-nowrap"
-                >
-                  태그 관리
-                </Link>
+                       <Link
+                         href="/dashboard/tags"
+                         className="block px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-bg-secondary)] rounded-md transition-colors whitespace-nowrap"
+                       >
+                         태그 목록
+                       </Link>
               </nav>
             </aside>
 

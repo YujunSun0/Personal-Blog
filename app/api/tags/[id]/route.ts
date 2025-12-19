@@ -6,56 +6,19 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+// 태그는 글 작성 시에만 생성되며, 수정/삭제할 수 없습니다.
+// 글 삭제 시 연결된 태그는 자동으로 정리됩니다.
 export async function PUT(request: Request, { params }: RouteParams) {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { id } = await params;
-    const body = await request.json();
-    const { name } = body;
-
-    if (!name || typeof name !== 'string' || !name.trim()) {
-      return NextResponse.json({ error: 'Tag name is required' }, { status: 400 });
-    }
-
-    const tag = await updateTag(id, name);
-    return NextResponse.json(tag);
-  } catch (error) {
-    console.error('Error updating tag:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to update tag' },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    { error: '태그는 수정할 수 없습니다. 글 작성 시에만 생성됩니다.' },
+    { status: 403 }
+  );
 }
 
 export async function DELETE(request: Request, { params }: RouteParams) {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { id } = await params;
-    await deleteTag(id);
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting tag:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to delete tag' },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    { error: '태그는 삭제할 수 없습니다. 연결된 글이 모두 삭제되면 자동으로 정리됩니다.' },
+    { status: 403 }
+  );
 }
 

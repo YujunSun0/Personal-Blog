@@ -24,32 +24,12 @@ export async function GET() {
   }
 }
 
+// 태그는 글 작성 시에만 생성됩니다.
+// 이 API는 비활성화되었습니다.
 export async function POST(request: Request) {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const { name } = body;
-
-    if (!name || typeof name !== 'string' || !name.trim()) {
-      return NextResponse.json({ error: 'Tag name is required' }, { status: 400 });
-    }
-
-    const tag = await createTag(name);
-    return NextResponse.json(tag, { status: 201 });
-  } catch (error) {
-    console.error('Error creating tag:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to create tag' },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    { error: '태그는 글 작성 시에만 생성할 수 있습니다.' },
+    { status: 403 }
+  );
 }
 

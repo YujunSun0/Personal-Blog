@@ -8,10 +8,10 @@ export default async function TagsPage() {
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[var(--color-text-primary)]">
-          태그 관리
+          태그 목록
         </h1>
         <p className="mt-2 text-[var(--color-text-secondary)]">
-          태그를 생성하고 관리할 수 있습니다.
+          현재 사용 중인 태그 목록입니다. 태그는 글 작성 시에만 생성됩니다.
         </p>
       </div>
 
