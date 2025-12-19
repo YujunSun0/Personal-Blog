@@ -18,4 +18,3 @@ export function PostTags({ tags }: PostTagsProps) {
     </div>
   );
 }
-
