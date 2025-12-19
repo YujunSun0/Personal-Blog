@@ -30,6 +30,12 @@ export function Header() {
           >
             태그
           </Link>
+          <Link
+            href="/gallery"
+            className="text-xs md:text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
+          >
+            갤러리
+          </Link>
           <button
             className="text-xs md:text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors bg-transparent border-none cursor-pointer"
             aria-label="다크모드 토글"

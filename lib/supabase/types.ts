@@ -165,6 +165,64 @@ export interface Database {
           updated_at?: string;
         };
       };
+      albums: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          cover_image_url: string | null;
+          is_published: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          cover_image_url?: string | null;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string | null;
+          cover_image_url?: string | null;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      album_images: {
+        Row: {
+          id: string;
+          album_id: string;
+          image_url: string;
+          title: string | null;
+          description: string | null;
+          position: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          album_id: string;
+          image_url: string;
+          title?: string | null;
+          description?: string | null;
+          position?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          album_id?: string;
+          image_url?: string;
+          title?: string | null;
+          description?: string | null;
+          position?: number;
+          created_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;

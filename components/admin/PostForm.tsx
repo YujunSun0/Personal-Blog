@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { PostType } from '@/types/post';
 import { MarkdownEditor } from './MarkdownEditor';
+import { PostSettings } from './PostSettings';
 
 interface PostFormData {
   title: string;
@@ -26,6 +27,8 @@ export function PostForm({ initialData, postId }: PostFormProps) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [formData, setFormData] = useState<PostFormData>({
     title: initialData?.title || '',
@@ -110,8 +113,30 @@ export function PostForm({ initialData, postId }: PostFormProps) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handlePublishClick = () => {
+    // 제목과 내용이 있는지 확인
+    if (!formData.title.trim() || !formData.content.trim()) {
+      toast.error('제목과 내용을 입력해주세요.');
+      return;
+    }
+    // 설정 페이지로 이동
+    setShowSettings(true);
+  };
+
+  const handleSettingsCancel = () => {
+    setIsExiting(true);
+    // 애니메이션 완료 후 상태 변경
+    setTimeout(() => {
+      setShowSettings(false);
+      setIsExiting(false);
+    }, 300); // 애니메이션 지속 시간과 동일
+  };
+
+  const handleFinalPublish = async (settings: {
+    description: string;
+    thumbnailUrl: string;
+    isPublished: boolean;
+  }) => {
     setLoading(true);
     setError(null);
 
@@ -119,15 +144,20 @@ export function PostForm({ initialData, postId }: PostFormProps) {
       const url = postId ? `/api/posts/${postId}` : '/api/posts';
       const method = postId ? 'PUT' : 'POST';
 
+      // 설정에서 받은 값으로 업데이트
+      const finalData = {
+        ...formData,
+        description: settings.description,
+        thumbnailUrl: settings.thumbnailUrl,
+        isPublished: settings.isPublished,
+      };
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          isPublished: true,
-        }),
+        body: JSON.stringify(finalData),
       });
 
       if (!response.ok) {
@@ -144,6 +174,28 @@ export function PostForm({ initialData, postId }: PostFormProps) {
     }
   };
 
+  // 설정 페이지 표시
+  if (showSettings) {
+    return (
+      <div className="relative flex flex-col h-full overflow-hidden">
+        <div className={isExiting ? 'animate-slide-down' : 'animate-slide-up'}>
+          <PostSettings
+            title={formData.title}
+            content={formData.content}
+            description={formData.description}
+            type={formData.type}
+            thumbnailUrl={formData.thumbnailUrl}
+            isPublished={formData.isPublished}
+            tags={formData.tags}
+            onCancel={handleSettingsCancel}
+            onPublish={handleFinalPublish}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // 작성 페이지
   return (
     <div className="flex flex-col h-full bg-[var(--color-bg-primary)]">
       {error && (
@@ -230,20 +282,15 @@ export function PostForm({ initialData, postId }: PostFormProps) {
             <option value="LIFE">LIFE</option>
           </select>
           <button
-            type="submit"
-            onClick={handleSubmit}
-            disabled={loading || !formData.title.trim() || !formData.content.trim()}
-            className="px-6 py-2 bg-[var(--color-secondary)] text-white rounded-lg hover:bg-[var(--color-secondary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+            type="button"
+            onClick={handlePublishClick}
+            disabled={!formData.title.trim() || !formData.content.trim()}
+            className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           >
-            {loading ? '출간 중...' : '출간하기'}
+            출간하기
           </button>
         </div>
       </div>
-
-      {/* 숨겨진 폼 (타입 제출용) */}
-      <form onSubmit={handleSubmit} className="hidden">
-        <input type="submit" />
-      </form>
     </div>
   );
 }
