@@ -22,6 +22,7 @@ export function TagFilter({ tags }: TagFilterProps) {
       // 다른 태그 선택
       params.set('tag', tagName);
     }
+    params.delete('page'); // 페이지 초기화
     router.push(`/?${params.toString()}`);
   };
 
@@ -29,36 +30,47 @@ export function TagFilter({ tags }: TagFilterProps) {
   const totalCount = tags.reduce((sum, tag) => sum + tag.postCount, 0);
 
   return (
-    <div className="mb-8">
-      <div className="flex flex-wrap gap-2">
-        {/* 전체 보기 */}
-        <button
-          onClick={() => {
-            const params = new URLSearchParams(searchParams.toString());
-            params.delete('tag');
-            router.push(`/?${params.toString()}`);
-          }}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-            !selectedTag
-              ? 'bg-[var(--color-primary)] text-white'
-              : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]'
-          }`}
-        >
-          전체보기 ({totalCount})
-        </button>
+    <div className="space-y-2">
+      {/* 전체 보기 */}
+      <button
+        onClick={() => {
+          const params = new URLSearchParams(searchParams.toString());
+          params.delete('tag');
+          params.delete('page'); // 페이지 초기화
+          router.push(`/?${params.toString()}`);
+        }}
+        className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all text-left ${
+          !selectedTag
+            ? 'bg-[var(--color-primary)] text-white shadow-sm'
+            : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]'
+        }`}
+      >
+        <span>전체</span>
+        <span className={`text-xs ${
+          !selectedTag ? 'text-white/80' : 'text-[var(--color-text-tertiary)]'
+        }`}>
+          {totalCount}
+        </span>
+      </button>
 
-        {/* 태그 목록 */}
+      {/* 태그 목록 */}
+      <div className="space-y-1 max-h-[600px] overflow-y-auto">
         {tags.map((tag) => (
           <button
             key={tag.id}
             onClick={() => handleTagClick(tag.name)}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-left ${
               selectedTag === tag.name
-                ? 'bg-[var(--color-primary)] text-white'
+                ? 'bg-[var(--color-primary)] text-white shadow-sm'
                 : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]'
             }`}
           >
-            {tag.name} ({tag.postCount})
+            <span>{tag.name}</span>
+            <span className={`text-xs ${
+              selectedTag === tag.name ? 'text-white/80' : 'text-[var(--color-text-tertiary)]'
+            }`}>
+              {tag.postCount}
+            </span>
           </button>
         ))}
       </div>

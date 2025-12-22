@@ -43,8 +43,8 @@
   --color-type-tech-bg: #DBEAFE;
   --color-type-trouble: #F59E0B;
   --color-type-trouble-bg: #FEF3C7;
-  --color-type-life: #10B981;
-  --color-type-life-bg: #D1FAE5;
+  --color-type-life: #10B981; /* PROJECT 타입용 */
+  --color-type-life-bg: #D1FAE5; /* PROJECT 타입용 */
 
   /* 컨테이너 */
   --container-max-width: 1400px;

@@ -15,7 +15,7 @@ export function PostCard({ post, href }: PostCardProps) {
         return 'bg-[var(--color-type-tech-bg)] text-[var(--color-type-tech)]';
       case 'TROUBLESHOOTING':
         return 'bg-[var(--color-type-trouble-bg)] text-[var(--color-type-trouble)]';
-      case 'LIFE':
+      case 'PROJECT':
         return 'bg-[var(--color-type-life-bg)] text-[var(--color-type-life)]';
       default:
         return 'bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)]';
@@ -29,25 +29,29 @@ export function PostCard({ post, href }: PostCardProps) {
 
   return (
     <Link href={postHref}>
-      <article className="flex gap-6 p-6 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-xl transition-all hover:border-[var(--color-border-hover)] hover:shadow-md hover:translate-x-1 cursor-pointer">
+      <article className="group flex flex-col md:flex-row gap-6 p-6 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-2xl transition-all hover:border-[var(--color-border-hover)] hover:shadow-lg hover:-translate-y-1 cursor-pointer">
         {/* 썸네일 */}
-        <div className="flex-shrink-0 w-[280px] h-[180px] rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm overflow-hidden">
+        <div className={`flex-shrink-0 w-full md:w-[280px] h-[200px] md:h-[180px] rounded-xl flex items-center justify-center text-sm overflow-hidden ${
+          post.thumbnailUrl 
+            ? 'bg-gray-50' 
+            : 'bg-gradient-to-br from-blue-400 to-purple-500 text-white'
+        }`}>
           {post.thumbnailUrl ? (
             <img
               src={post.thumbnailUrl}
               alt={post.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
-            <span>썸네일 이미지</span>
+            <span className="text-sm">썸네일 이미지</span>
           )}
         </div>
 
         {/* 콘텐츠 */}
         <div className="flex-1 flex flex-col justify-between min-w-0">
           <div>
-            {/* 타입 뱃지 */}
-            <div className="mb-3">
+            {/* 타입 뱃지 및 날짜 */}
+            <div className="flex items-center justify-between mb-3">
               <span
                 className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getTypeBadgeClass(
                   post.type
@@ -55,10 +59,13 @@ export function PostCard({ post, href }: PostCardProps) {
               >
                 {post.type}
               </span>
+              <span className="text-xs text-[var(--color-text-tertiary)] hidden md:block">
+                {formatDate(post.createdAt)}
+              </span>
             </div>
 
             {/* 제목 */}
-            <h3 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-3 line-clamp-2">
+            <h3 className="text-xl md:text-2xl font-bold text-[var(--color-text-primary)] mb-3 line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
               {post.title}
             </h3>
 
@@ -72,20 +79,20 @@ export function PostCard({ post, href }: PostCardProps) {
             {/* 태그 */}
             {post.tags && post.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-4">
-                {post.tags.slice(0, 3).map((tag) => (
+                {post.tags.slice(0, 4).map((tag) => (
                   <TagBadge key={tag.id} name={tag.name} size="sm" />
                 ))}
-                {post.tags.length > 3 && (
-                  <span className="text-xs text-[var(--color-text-tertiary)]">
-                    +{post.tags.length - 3}
+                {post.tags.length > 4 && (
+                  <span className="text-xs text-[var(--color-text-tertiary)] px-2 py-1">
+                    +{post.tags.length - 4}
                   </span>
                 )}
               </div>
             )}
           </div>
 
-          {/* 날짜 */}
-          <div className="text-sm text-[var(--color-text-tertiary)]">
+          {/* 날짜 (모바일) */}
+          <div className="text-sm text-[var(--color-text-tertiary)] md:hidden">
             {formatDate(post.createdAt)}
           </div>
         </div>

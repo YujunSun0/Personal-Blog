@@ -18,7 +18,7 @@ export interface Database {
           title: string;
           description: string | null;
           content: string;
-          type: 'TECH' | 'TROUBLESHOOTING' | 'LIFE';
+          type: 'TECH' | 'TROUBLESHOOTING' | 'PROJECT';
           thumbnail_url: string | null;
           is_published: boolean;
           created_at: string;
@@ -29,7 +29,7 @@ export interface Database {
           title: string;
           description?: string | null;
           content: string;
-          type: 'TECH' | 'TROUBLESHOOTING' | 'LIFE';
+          type: 'TECH' | 'TROUBLESHOOTING' | 'PROJECT';
           thumbnail_url?: string | null;
           is_published?: boolean;
           created_at?: string;
@@ -40,7 +40,7 @@ export interface Database {
           title?: string;
           description?: string | null;
           content?: string;
-          type?: 'TECH' | 'TROUBLESHOOTING' | 'LIFE';
+          type?: 'TECH' | 'TROUBLESHOOTING' | 'PROJECT';
           thumbnail_url?: string | null;
           is_published?: boolean;
           created_at?: string;
@@ -221,6 +221,47 @@ export interface Database {
           description?: string | null;
           position?: number;
           created_at?: string;
+        };
+      };
+      comments: {
+        Row: {
+          id: string;
+          post_id: string;
+          content: string;
+          author_name: string | null;
+          author_id: string | null;
+          password_hash: string | null;
+          ip_address: string | null;
+          is_deleted: boolean;
+          deleted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          post_id: string;
+          content: string;
+          author_name?: string | null;
+          author_id?: string | null;
+          password_hash?: string | null;
+          ip_address?: string | null;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          post_id?: string;
+          content?: string;
+          author_name?: string | null;
+          author_id?: string | null;
+          password_hash?: string | null;
+          ip_address?: string | null;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
       };
     };

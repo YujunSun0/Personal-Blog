@@ -646,7 +646,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 ```typescript
 // types/post.ts
-export type PostType = 'TECH' | 'TROUBLESHOOTING' | 'LIFE';
+export type PostType = 'TECH' | 'TROUBLESHOOTING' | 'PROJECT';
 
 export interface Post {
   id: string;

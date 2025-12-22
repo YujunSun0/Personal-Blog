@@ -279,7 +279,7 @@ export function PostForm({ initialData, postId }: PostFormProps) {
           >
             <option value="TECH">TECH</option>
             <option value="TROUBLESHOOTING">TROUBLESHOOTING</option>
-            <option value="LIFE">LIFE</option>
+            <option value="PROJECT">PROJECT</option>
           </select>
           <button
             type="button"

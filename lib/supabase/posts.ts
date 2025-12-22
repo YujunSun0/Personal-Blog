@@ -55,7 +55,10 @@ function mapPostToInsert(post: Omit<Post, 'id' | 'createdAt' | 'updatedAt'>): Po
  * 공개된 글 목록 조회 (is_published = true)
  * 태그 정보 포함
  */
-export async function getPublishedPosts(tagName?: string): Promise<PostListItem[]> {
+export async function getPublishedPosts(
+  tagName?: string,
+  postType?: 'TECH' | 'TROUBLESHOOTING' | 'PROJECT'
+): Promise<PostListItem[]> {
   const supabase = await createClient();
 
   let postIds: string[] | undefined;
@@ -92,6 +95,12 @@ export async function getPublishedPosts(tagName?: string): Promise<PostListItem[
     .select('*')
     .eq('is_published', true);
 
+  // 타입 필터링
+  if (postType) {
+    query = query.eq('type', postType);
+  }
+
+  // 태그 필터링
   if (postIds) {
     query = query.in('id', postIds);
   }

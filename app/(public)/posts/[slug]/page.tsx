@@ -4,6 +4,7 @@ import { getTagsByPostId } from '@/lib/supabase/tags';
 import { PostHeader } from '@/components/post/PostHeader';
 import { PostContent } from '@/components/post/PostContent';
 import { PostTags } from '@/components/post/PostTags';
+import { CommentList } from '@/components/comment/CommentList';
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
@@ -30,6 +31,7 @@ export default async function PostPage({ params }: PostPageProps) {
       <PostHeader post={post} />
       {tags.length > 0 && <PostTags tags={tags} />}
       <PostContent content={post.content} />
+      <CommentList postId={post.id} />
     </article>
   );
 }

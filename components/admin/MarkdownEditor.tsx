@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeHighlight from 'rehype-highlight';
 import { PostContent } from '@/components/post/PostContent';
+import { toast } from 'sonner';
 
 interface MarkdownEditorProps {
   content: string;
@@ -14,7 +15,9 @@ interface MarkdownEditorProps {
 
 export function MarkdownEditor({ content, onChange }: MarkdownEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPreview, setShowPreview] = useState(true);
+  const [uploading, setUploading] = useState(false);
 
   // 현재 줄의 시작과 끝 위치 찾기
   const getCurrentLine = (position: number) => {
@@ -321,6 +324,86 @@ export function MarkdownEditor({ content, onChange }: MarkdownEditorProps) {
     }, 0);
   };
 
+  // 이미지 업로드 함수
+  const handleImageUpload = async (file: File) => {
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'posts');
+
+      const uploadResponse = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.error || '이미지 업로드 실패');
+      }
+
+      const { url } = await uploadResponse.json();
+
+      // 현재 커서 위치에 이미지 마크다운 삽입
+      const textarea = textareaRef.current;
+      if (textarea) {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = content.substring(start, end);
+        
+        // 선택된 텍스트가 있으면 이미지 설명으로 사용, 없으면 파일명 사용
+        const imageAlt = selectedText || file.name.replace(/\.[^/.]+$/, '');
+        const imageMarkdown = `![${imageAlt}](${url})`;
+        
+        const newText =
+          content.substring(0, start) +
+          imageMarkdown +
+          content.substring(end);
+
+        onChange(newText);
+
+        // 커서를 이미지 마크다운 뒤로 이동
+        setTimeout(() => {
+          const newCursorPos = start + imageMarkdown.length;
+          textarea.focus();
+          textarea.setSelectionRange(newCursorPos, newCursorPos);
+        }, 0);
+      }
+
+      toast.success('이미지가 업로드되었습니다.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // 이미지 파일 선택 핸들러
+  const handleImageFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    
+    // 파일 타입 검증
+    if (!file.type.startsWith('image/')) {
+      toast.error('이미지 파일만 업로드 가능합니다.');
+      return;
+    }
+
+    // 파일 크기 검증 (5MB 제한)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('파일 크기는 5MB 이하여야 합니다.');
+      return;
+    }
+
+    await handleImageUpload(file);
+  };
+
   // 툴바 버튼 핸들러
   const handleToolbarClick = (action: string) => {
     switch (action) {
@@ -352,7 +435,8 @@ export function MarkdownEditor({ content, onChange }: MarkdownEditorProps) {
         insertText('[', '](url)', '링크 텍스트');
         break;
       case 'image':
-        insertText('![', '](url)', '이미지 설명');
+        // 이미지 업로드를 위해 파일 선택 다이얼로그 열기
+        fileInputRef.current?.click();
         break;
       case 'code':
         // 코드 블록: 여러 줄 선택 시 감싸기, 아니면 블록 생성
@@ -378,6 +462,14 @@ export function MarkdownEditor({ content, onChange }: MarkdownEditorProps) {
 
   return (
     <div className="flex flex-col h-full">
+      {/* 숨겨진 파일 입력 */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageFileSelect}
+        className="hidden"
+      />
       {/* 툴바 */}
       <div className="flex items-center gap-2 p-3 border-b border-[var(--color-border)] bg-[var(--color-bg-primary)]">
         <button
@@ -457,10 +549,11 @@ export function MarkdownEditor({ content, onChange }: MarkdownEditorProps) {
         <button
           type="button"
           onClick={() => handleToolbarClick('image')}
-          className="px-2 py-1 text-sm hover:bg-[var(--color-bg-secondary)] rounded transition-colors"
-          title="이미지"
+          disabled={uploading}
+          className="px-2 py-1 text-sm hover:bg-[var(--color-bg-secondary)] rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          title={uploading ? '업로드 중...' : '이미지 업로드'}
         >
-          🖼️
+          {uploading ? '⏳' : '🖼️'}
         </button>
         <button
           type="button"

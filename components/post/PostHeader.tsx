@@ -11,7 +11,7 @@ export function PostHeader({ post }: PostHeaderProps) {
         return 'bg-[var(--color-type-tech-bg)] text-[var(--color-type-tech)]';
       case 'TROUBLESHOOTING':
         return 'bg-[var(--color-type-trouble-bg)] text-[var(--color-type-trouble)]';
-      case 'LIFE':
+      case 'PROJECT':
         return 'bg-[var(--color-type-life-bg)] text-[var(--color-type-life)]';
       default:
         return 'bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)]';

@@ -56,7 +56,7 @@
 #### 글 타입
 - TECH : 기술 학습 및 개발 기록
 - TROUBLESHOOTING : 버그 및 이슈 해결 과정
-- LIFE : 사진 및 일상 기록
+- PROJECT : 프로젝트 기록
 
 #### 기능
 - Markdown 기반 글 작성
@@ -166,7 +166,7 @@ id (uuid)
 title
 description (text) - 글 요약/설명 (SEO 및 목록 미리보기용)
 content (markdown)
-type (TECH | TROUBLE | LIFE)
+type (TECH | TROUBLESHOOTING | PROJECT)
 thumbnail_url (text) - 썸네일 이미지 URL (nullable)
 is_published (boolean)
 created_at

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import type { PostType } from '@/types/post';
 
@@ -35,6 +35,87 @@ export function PostSettings({
   const [thumbnailUrl, setThumbnailUrl] = useState(initialThumbnailUrl);
   const [isPublished, setIsPublished] = useState(initialIsPublished);
   const [loading, setLoading] = useState(false);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const thumbnailFileInputRef = useRef<HTMLInputElement>(null);
+
+  // 마크다운에서 첫 번째 이미지 URL 추출 함수
+  const extractFirstImageUrl = (markdownContent: string): string | null => {
+    if (!markdownContent) return null;
+
+    // 마크다운 이미지 문법: ![alt](url) 또는 ![alt](url "title")
+    const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/;
+    const match = markdownContent.match(imageRegex);
+    
+    if (match && match[2]) {
+      // URL에서 따옴표나 공백 제거
+      const url = match[2].trim().replace(/^["']|["']$/g, '');
+      return url;
+    }
+
+    return null;
+  };
+
+  // content가 변경될 때 썸네일이 없으면 첫 번째 이미지로 자동 설정
+  useEffect(() => {
+    if (!thumbnailUrl && content) {
+      const firstImageUrl = extractFirstImageUrl(content);
+      if (firstImageUrl) {
+        setThumbnailUrl(firstImageUrl);
+      }
+    }
+  }, [content, thumbnailUrl]);
+
+  const handleThumbnailUpload = async (file: File) => {
+    setUploadingThumbnail(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'thumbnails');
+
+      const uploadResponse = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.error || '썸네일 업로드 실패');
+      }
+
+      const { url } = await uploadResponse.json();
+      setThumbnailUrl(url);
+      toast.success('썸네일이 업로드되었습니다.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '썸네일 업로드에 실패했습니다.');
+    } finally {
+      setUploadingThumbnail(false);
+      if (thumbnailFileInputRef.current) {
+        thumbnailFileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleThumbnailFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    
+    // 파일 타입 검증
+    if (!file.type.startsWith('image/')) {
+      toast.error('이미지 파일만 업로드 가능합니다.');
+      return;
+    }
+
+    // 파일 크기 검증 (5MB 제한)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('파일 크기는 5MB 이하여야 합니다.');
+      return;
+    }
+
+    await handleThumbnailUpload(file);
+  };
 
   const handlePublish = async () => {
     setLoading(true);
@@ -50,7 +131,7 @@ export function PostSettings({
   };
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-bg-primary)]">
+    <div className="flex flex-col h-full bg-[var(--color-bg-primary)] min-h-[calc(100vh-63px)]">
       <div className="flex flex-1 overflow-hidden">
         {/* 포스트 미리보기 및 설정 */}
         <div className="flex flex-1 px-16 py-12 gap-12 overflow-hidden max-w-[1024px] mx-auto">
@@ -62,7 +143,7 @@ export function PostSettings({
 
           {/* 썸네일 */}
           <div className="mb-6">
-            <div className="w-full h-64 bg-[var(--color-bg-secondary)] rounded-lg flex items-center justify-center mb-4 overflow-hidden">
+            <div className="w-full h-64 bg-[var(--color-bg-secondary)] rounded-lg flex items-center justify-center mb-4 overflow-hidden relative">
               {thumbnailUrl ? (
                 <img
                   src={thumbnailUrl}
@@ -87,12 +168,61 @@ export function PostSettings({
                   <p className="text-sm">썸네일 이미지</p>
                 </div>
               )}
+              {uploadingThumbnail && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <div className="text-white text-sm">업로드 중...</div>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2 mb-2">
+              <input
+                ref={thumbnailFileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleThumbnailFileSelect}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => thumbnailFileInputRef.current?.click()}
+                disabled={uploadingThumbnail}
+                className="px-4 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+              >
+                {uploadingThumbnail ? '업로드 중...' : '이미지 업로드'}
+              </button>
+              {content && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const firstImageUrl = extractFirstImageUrl(content);
+                    if (firstImageUrl) {
+                      setThumbnailUrl(firstImageUrl);
+                      toast.success('글의 첫 번째 이미지로 설정되었습니다.');
+                    } else {
+                      toast.info('글에서 이미지를 찾을 수 없습니다.');
+                    }
+                  }}
+                  className="px-4 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)] transition-colors text-sm"
+                  title="글의 첫 번째 이미지를 썸네일로 사용"
+                >
+                  글에서 추출
+                </button>
+              )}
+              {thumbnailUrl && (
+                <button
+                  type="button"
+                  onClick={() => setThumbnailUrl('')}
+                  className="px-4 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)] transition-colors text-sm"
+                >
+                  제거
+                </button>
+              )}
             </div>
             <input
               type="text"
               value={thumbnailUrl}
               onChange={(e) => setThumbnailUrl(e.target.value)}
-              placeholder="썸네일 이미지 URL을 입력하세요"
+              placeholder="또는 썸네일 이미지 URL을 직접 입력하세요"
               className="w-full px-4 py-2 border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]"
             />
           </div>
@@ -116,28 +246,6 @@ export function PostSettings({
             />
             <div className="text-right text-sm text-[var(--color-text-tertiary)] mt-1">
               {description.length}/150
-            </div>
-          </div>
-
-          {/* 미리보기 정보 */}
-          <div className="bg-[var(--color-bg-secondary)] rounded-lg p-4">
-            <h3 className="font-semibold text-[var(--color-text-primary)] mb-2">
-              {title}
-            </h3>
-            {description && (
-              <p className="text-sm text-[var(--color-text-secondary)] mb-2">
-                {description}
-              </p>
-            )}
-            <div className="flex flex-wrap gap-2 mt-2">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2 py-1 bg-[var(--color-bg-primary)] text-[var(--color-text-secondary)] rounded text-xs"
-                >
-                  {tag}
-                </span>
-              ))}
             </div>
           </div>
           </div>
