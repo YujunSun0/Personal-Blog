@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { getPublishedPosts } from '@/lib/supabase/posts';
 import { getPublishedTagsWithCount } from '@/lib/supabase/tags';
 import { TabNavigation } from '@/components/post/TabNavigation';
@@ -8,6 +9,58 @@ import type { PostType } from '@/types/post';
 
 interface HomeProps {
   searchParams: Promise<{ tag?: string; type?: string; page?: string }>;
+}
+
+// 동적 메타 정보 생성
+export async function generateMetadata({ searchParams }: HomeProps): Promise<Metadata> {
+  const { tag, type } = await searchParams;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://yujunsun-blog.vercel.app';
+
+  let title = 'Yujunsun\'s Blog';
+  let description = '기술 학습 및 실무 경험 + 여행 사진을 기록하는 공간입니다.';
+
+  if (tag) {
+    title = `태그: ${tag} | Yujunsun's Blog`;
+    description = `"${tag}" 태그로 작성된 글 목록입니다.`;
+  } else if (type) {
+    const typeLabels: Record<string, string> = {
+      TECH: '개발',
+      TROUBLESHOOTING: '트러블슈팅',
+      PROJECT: '프로젝트',
+    };
+    title = `${typeLabels[type] || type} | Yujunsun's Blog`;
+    description = `${typeLabels[type] || type} 카테고리의 글 목록입니다.`;
+  }
+
+  return {
+    title,
+    description,
+    openGraph: {
+      type: 'website',
+      locale: 'ko_KR',
+      url: tag || type ? `${siteUrl}/?${tag ? `tag=${tag}` : `type=${type}`}` : siteUrl,
+      siteName: 'Yujunsun\'s Blog',
+      title,
+      description,
+      images: [
+        {
+          url: `${siteUrl}/images/blog_banner.png`,
+          width: 1200,
+          height: 630,
+          alt: 'Yujunsun\'s Blog',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [`${siteUrl}/images/blog_banner.png`],
+    },
+    alternates: {
+      canonical: tag || type ? `${siteUrl}/?${tag ? `tag=${tag}` : `type=${type}`}` : siteUrl,
+    },
+  };
 }
 
 const POSTS_PER_PAGE = 10;

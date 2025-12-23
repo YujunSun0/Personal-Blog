@@ -3,8 +3,51 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "개인 기술 블로그",
-  description: "기술 학습 및 실무 경험 기록 블로그",
+  title: {
+    default: "Yujunsun's Blog",
+    template: "%s | Yujunsun's Blog",
+  },
+  description: "기술 학습 및 실무 경험 + 여행 사진을 기록하는 공간입니다.",
+  keywords: ["기술 블로그", "개발", "프로그래밍", "TECH", "트러블슈팅", "프로젝트", "여행", "사진"],
+  authors: [{ name: "yujunsun0" }],
+  creator: "yujunsun0",
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: "https://yujunsun-blog.vercel.app",
+    siteName: "Yujunsun's Blog",
+    title: "Yujunsun's Blog",
+    description: "기술 학습 및 실무 경험 + 여행 사진을 기록하는 공간입니다.",
+    images: [
+      {
+        url: "/images/blog_banner.png",
+        width: 1200,
+        height: 630,
+        alt: "기술 블로그",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Yujunsun's Blog",
+    description: "기술 학습 및 실무 경험 + 여행 사진을 기록하는 공간입니다.",
+    images: ["/images/blog_banner.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    // Google Search Console 등록 시 추가
+    // google: "your-google-verification-code",
+  },
 };
 
 export default function RootLayout({
