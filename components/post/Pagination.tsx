@@ -61,27 +61,28 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
   };
 
   return (
-    <nav className="flex items-center justify-center gap-2 mt-12">
+    <nav className="flex items-center justify-center gap-2 mt-12" aria-label="페이지 네비게이션">
       {/* 이전 버튼 */}
       {currentPage > 1 ? (
         <Link
           href={createPageUrl(currentPage - 1)}
-          className="px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+          className="px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 rounded"
+          aria-label={`이전 페이지 (${currentPage - 1}페이지)`}
         >
           이전
         </Link>
       ) : (
-        <span className="px-4 py-2 text-sm text-[var(--color-text-tertiary)] cursor-not-allowed">
+        <span className="px-4 py-2 text-sm text-[var(--color-text-tertiary)] cursor-not-allowed" aria-disabled="true">
           이전
         </span>
       )}
 
       {/* 페이지 번호 */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1" role="list">
         {getPageNumbers().map((page, index) => {
           if (page === '...') {
             return (
-              <span key={`ellipsis-${index}`} className="px-2 text-[var(--color-text-tertiary)]">
+              <span key={`ellipsis-${index}`} className="px-2 text-[var(--color-text-tertiary)]" aria-hidden="true">
                 ...
               </span>
             );
@@ -94,7 +95,10 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
             <Link
               key={pageNum}
               href={createPageUrl(pageNum)}
-              className={`px-3 py-2 text-sm font-medium transition-colors rounded ${
+              role="listitem"
+              aria-label={`${pageNum}페이지로 이동`}
+              aria-current={isActive ? 'page' : undefined}
+              className={`px-3 py-2 text-sm font-medium transition-colors rounded focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${
                 isActive
                   ? 'bg-[var(--color-primary)] text-white'
                   : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
@@ -110,12 +114,13 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
       {currentPage < totalPages ? (
         <Link
           href={createPageUrl(currentPage + 1)}
-          className="px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+          className="px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 rounded"
+          aria-label={`다음 페이지 (${currentPage + 1}페이지)`}
         >
           다음
         </Link>
       ) : (
-        <span className="px-4 py-2 text-sm text-[var(--color-text-tertiary)] cursor-not-allowed">
+        <span className="px-4 py-2 text-sm text-[var(--color-text-tertiary)] cursor-not-allowed" aria-disabled="true">
           다음
         </span>
       )}

@@ -30,7 +30,7 @@ export function TagFilter({ tags }: TagFilterProps) {
   const totalCount = tags.reduce((sum, tag) => sum + tag.postCount, 0);
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" role="listbox" aria-label="태그 필터">
       {/* 전체 보기 */}
       <button
         onClick={() => {
@@ -39,7 +39,9 @@ export function TagFilter({ tags }: TagFilterProps) {
           params.delete('page'); // 페이지 초기화
           router.push(`/?${params.toString()}`);
         }}
-        className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all text-left ${
+        role="option"
+        aria-selected={!selectedTag}
+        className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all text-left focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${
           !selectedTag
             ? 'bg-[var(--color-primary)] text-white shadow-sm'
             : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]'
@@ -54,12 +56,15 @@ export function TagFilter({ tags }: TagFilterProps) {
       </button>
 
       {/* 태그 목록 */}
-      <div className="space-y-1 max-h-[600px] overflow-y-auto">
+      <div className="space-y-1 max-h-[600px] overflow-y-auto" role="listbox">
         {tags.map((tag) => (
           <button
             key={tag.id}
             onClick={() => handleTagClick(tag.name)}
-            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-left ${
+            role="option"
+            aria-selected={selectedTag === tag.name}
+            aria-label={`${tag.name} 태그로 필터링 (${tag.postCount}개 글)`}
+            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-left focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${
               selectedTag === tag.name
                 ? 'bg-[var(--color-primary)] text-white shadow-sm'
                 : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]'

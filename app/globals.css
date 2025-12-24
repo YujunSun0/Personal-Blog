@@ -332,3 +332,25 @@ button {
 .animate-slide-down {
   animation: slide-down 0.3s ease-in;
 }
+
+/* 접근성 개선: 포커스 스타일 */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* 스킵 링크 (키보드 사용자를 위한) */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--color-primary);
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 0;
+}

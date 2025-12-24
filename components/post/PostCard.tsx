@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import type { PostListItem } from '@/types/post';
 import { TagBadge } from '@/components/tag/TagBadge';
 
@@ -31,16 +32,18 @@ export function PostCard({ post, href }: PostCardProps) {
     <Link href={postHref}>
       <article className="group flex flex-col md:flex-row gap-6 p-6 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-2xl transition-all hover:border-[var(--color-border-hover)] hover:shadow-lg hover:-translate-y-1 cursor-pointer">
         {/* 썸네일 */}
-        <div className={`flex-shrink-0 w-full md:w-[280px] h-[200px] md:h-[180px] rounded-xl flex items-center justify-center text-sm overflow-hidden ${
+        <div className={`flex-shrink-0 w-full md:w-[280px] h-[200px] md:h-[180px] rounded-xl flex items-center justify-center text-sm overflow-hidden relative ${
           post.thumbnailUrl 
             ? 'bg-[var(--color-bg-secondary)]' 
             : 'bg-gradient-to-br from-blue-400 to-purple-500 text-white'
         }`}>
           {post.thumbnailUrl ? (
-            <img
+            <Image
               src={post.thumbnailUrl}
               alt={post.title}
-              className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
+              fill
+              className="object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 768px) 100vw, 280px"
             />
           ) : (
             <span className="text-sm">썸네일 이미지</span>
