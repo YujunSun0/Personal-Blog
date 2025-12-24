@@ -114,14 +114,19 @@ export function AlbumForm({ initialData, albumId }: AlbumFormProps) {
 
       toast.success(albumId ? '앨범이 수정되었습니다.' : '앨범이 생성되었습니다.');
       
-      if (albumId) {
-        // 앨범 수정인 경우 현재 페이지 새로고침
-        router.refresh();
-      } else {
-        // 앨범 생성인 경우 목록 페이지로 이동
-        router.push('/dashboard/albums');
-        router.refresh();
-      }
+      // 로딩 상태 해제
+      setLoading(false);
+      
+      // 약간의 딜레이 후 페이지 새로고침 (토스트 메시지가 보이도록)
+      setTimeout(() => {
+        if (albumId) {
+          // 앨범 수정인 경우 현재 페이지 새로고침
+          router.refresh();
+        } else {
+          // 앨범 생성인 경우 목록 페이지로 이동
+          router.push('/dashboard/albums');
+        }
+      }, 500);
     } catch (err) {
       setError(err instanceof Error ? err.message : '앨범 저장에 실패했습니다.');
       setLoading(false);
