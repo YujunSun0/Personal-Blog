@@ -5,9 +5,10 @@ import { toast } from 'sonner';
 
 interface AlbumImageUploaderProps {
   albumId: string;
+  onUploadComplete?: () => void;
 }
 
-export function AlbumImageUploader({ albumId }: AlbumImageUploaderProps) {
+export function AlbumImageUploader({ albumId, onUploadComplete }: AlbumImageUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -56,8 +57,8 @@ export function AlbumImageUploader({ albumId }: AlbumImageUploaderProps) {
       }
 
       toast.success(`${files.length}개의 이미지가 업로드되었습니다.`);
-      // 페이지 새로고침하여 이미지 목록 업데이트
-      window.location.reload();
+      // 업로드 완료 콜백 호출
+      onUploadComplete?.();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.');
     } finally {
