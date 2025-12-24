@@ -32,7 +32,7 @@ export default async function SignupPage() {
             </span>
             <Link
               href="/auth/login"
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] font-medium"
             >
               로그인
             </Link>

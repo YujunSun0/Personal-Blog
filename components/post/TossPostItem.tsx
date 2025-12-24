@@ -74,7 +74,7 @@ export function TossPostItem({ post }: TossPostItemProps) {
         {/* 썸네일 */}
         <div className={`flex-shrink-0 w-32 md:w-40 h-24 md:h-28 rounded-lg overflow-hidden ${
           post.thumbnailUrl 
-            ? 'bg-gray-50' 
+            ? 'bg-[var(--color-bg-secondary)]' 
             : 'bg-gradient-to-br from-blue-400 to-purple-500'
         }`}>
           {post.thumbnailUrl ? (

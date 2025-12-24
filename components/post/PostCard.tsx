@@ -33,7 +33,7 @@ export function PostCard({ post, href }: PostCardProps) {
         {/* 썸네일 */}
         <div className={`flex-shrink-0 w-full md:w-[280px] h-[200px] md:h-[180px] rounded-xl flex items-center justify-center text-sm overflow-hidden ${
           post.thumbnailUrl 
-            ? 'bg-gray-50' 
+            ? 'bg-[var(--color-bg-secondary)]' 
             : 'bg-gradient-to-br from-blue-400 to-purple-500 text-white'
         }`}>
           {post.thumbnailUrl ? (

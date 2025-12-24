@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { AuthButtons } from './AuthButtons';
+import { ThemeToggle } from './ThemeToggle';
 
 export function Header() {
   return (
@@ -30,6 +31,7 @@ export function Header() {
           >
             갤러리
           </Link>
+          <ThemeToggle />
           <div className="ml-2 pl-4 border-l border-[var(--color-border)]">
             <AuthButtons />
           </div>

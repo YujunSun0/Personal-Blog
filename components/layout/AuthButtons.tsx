@@ -10,7 +10,7 @@ export function AuthButtons() {
   if (loading) {
     return (
       <div className="flex items-center gap-4">
-        <div className="w-16 h-8 bg-gray-200 rounded animate-pulse" />
+        <div className="w-16 h-8 bg-[var(--color-bg-secondary)] rounded animate-pulse" />
       </div>
     );
   }
