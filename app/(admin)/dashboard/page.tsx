@@ -23,7 +23,7 @@ export default async function DashboardPage() {
           대시보드
         </h1>
         <p className="mt-2 text-[var(--color-text-secondary)]">
-          환영합니다, {user.email}님!
+          환영합니다, {user.user_metadata.name}님!
         </p>
       </div>
 

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { AdminLayoutContent } from '@/components/admin/AdminLayoutContent';
+import { UserRole } from '@/types/profile';
 
 export default async function AdminLayout({
   children,
@@ -23,10 +24,10 @@ export default async function AdminLayout({
     .eq('user_id', user.id)
     .single();
 
-  if (!profile || profile.role !== 'admin') {
+  if (!profile || (profile as { role: UserRole }).role !== 'admin') {
     redirect('/');
   }
 
-  return <AdminLayoutContent userEmail={user.email || ''}>{children}</AdminLayoutContent>;
+  return <AdminLayoutContent userEmail={user.user_metadata.name || ''}>{children}</AdminLayoutContent>;
 }
 
