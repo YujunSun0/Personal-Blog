@@ -73,18 +73,18 @@ export function TossPostItem({ post }: TossPostItemProps) {
         </div>
 
         {/* 썸네일 */}
-        <div className={`flex-shrink-0 w-32 md:w-40 h-24 md:h-28 rounded-lg overflow-hidden relative ${
+        <div className={`flex-shrink-0 w-48 md:w-64 rounded-lg overflow-hidden relative ${
           post.thumbnailUrl 
             ? 'bg-[var(--color-bg-secondary)]' 
             : 'bg-gradient-to-br from-blue-400 to-purple-500'
-        }`}>
+        }`} style={{ aspectRatio: '1200/628' }}>
           {post.thumbnailUrl ? (
             <Image
               src={post.thumbnailUrl}
               alt={post.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 768px) 128px, 160px"
+              className="object-contain group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 768px) 192px, 256px"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-white text-xs">

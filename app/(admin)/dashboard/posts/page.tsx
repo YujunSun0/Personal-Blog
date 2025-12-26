@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getAllPosts } from '@/lib/supabase/posts';
-import { PostCard } from '@/components/post/PostCard';
+import { AdminPostCard } from '@/components/admin/AdminPostCard';
 
 export default async function PostsPage() {
   const supabase = await createClient();
@@ -46,10 +46,9 @@ export default async function PostsPage() {
           </div>
         ) : (
           posts.map((post) => (
-            <PostCard
+            <AdminPostCard
               key={post.id}
               post={post}
-              href={`/dashboard/posts/${post.id}/edit`}
             />
           ))
         )}

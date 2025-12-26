@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import type { PostType } from '@/types/post';
 import { MarkdownEditor } from './MarkdownEditor';
 import { PostSettings } from './PostSettings';
+import { DeletePostButton } from './DeletePostButton';
 
 interface PostFormData {
   title: string;
@@ -268,6 +269,9 @@ export function PostForm({ initialData, postId }: PostFormProps) {
           >
             {saving ? '저장 중...' : '임시저장'}
           </button>
+          {postId && (
+            <DeletePostButton postId={postId} postTitle={formData.title} />
+          )}
         </div>
 
         <div className="flex items-center gap-4">

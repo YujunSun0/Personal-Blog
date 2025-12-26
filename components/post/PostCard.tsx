@@ -68,7 +68,7 @@ export function PostCard({ post, href }: PostCardProps) {
             </div>
 
             {/* 제목 */}
-            <h3 className="text-xl md:text-2xl font-bold text-[var(--color-text-primary)] mb-3 line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
+            <h3 className="text-lg font-bold text-[var(--color-text-primary)] mb-3 line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
               {post.title}
             </h3>
 
