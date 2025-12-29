@@ -48,6 +48,7 @@
 
   /* 컨테이너 */
   --container-max-width: 1400px;
+  --container-max-width-narrow: 768px; /* 게시글 상세 페이지용 */
   --container-padding-x: 2rem;
 }
 
@@ -123,6 +124,19 @@ body {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  
+  .container-width {
+    max-width: var(--container-max-width);
+  }
+  
+  .container-width-narrow {
+    max-width: var(--container-max-width-narrow);
+  }
+  
+  .container-padding-x {
+    padding-left: var(--container-padding-x);
+    padding-right: var(--container-padding-x);
   }
 }
 

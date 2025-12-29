@@ -136,7 +136,7 @@ export default async function PostPage({ params }: PostPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <article className="max-w-[var(--container-max-width)] mx-auto px-[var(--container-padding-x)] py-8">
+      <article className="container-width-narrow mx-auto container-padding-x py-8">
         <PostHeader post={post} />
         {tags.length > 0 && <PostTags tags={tags} />}
         <PostContent content={post.content} thumbnailUrl={post.thumbnailUrl} title={post.title} />
