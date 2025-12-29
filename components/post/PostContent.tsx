@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeHighlight from 'rehype-highlight';
+import rehypeSlug from 'rehype-slug';
 import Image from 'next/image';
 import 'highlight.js/styles/github-dark.css';
 
@@ -33,20 +34,20 @@ export function PostContent({ content, thumbnailUrl, title }: PostContentProps) 
       )}
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, rehypeHighlight]}
+        rehypePlugins={[rehypeSlug, rehypeRaw, rehypeHighlight]}
         components={{
           // 커스텀 스타일링을 위한 컴포넌트 오버라이드
-          h1: ({ node, ...props }) => (
-            <h1 className="text-3xl font-bold mt-8 mb-4 text-[var(--color-text-primary)]" {...props} />
+          h1: ({ node, id, ...props }) => (
+            <h1 id={id} className="text-3xl font-bold mt-8 mb-4 text-[var(--color-text-primary)] scroll-mt-24" {...props} />
           ),
-          h2: ({ node, ...props }) => (
-            <h2 className="text-2xl font-bold mt-6 mb-3 text-[var(--color-text-primary)]" {...props} />
+          h2: ({ node, id, ...props }) => (
+            <h2 id={id} className="text-2xl font-bold mt-6 mb-3 text-[var(--color-text-primary)] scroll-mt-24" {...props} />
           ),
-          h3: ({ node, ...props }) => (
-            <h3 className="text-xl font-semibold mt-5 mb-2 text-[var(--color-text-primary)]" {...props} />
+          h3: ({ node, id, ...props }) => (
+            <h3 id={id} className="text-xl font-semibold mt-5 mb-2 text-[var(--color-text-primary)] scroll-mt-24" {...props} />
           ),
-          h4: ({ node, ...props }) => (
-            <h4 className="text-base font-semibold mt-3 mb-1 text-[var(--color-text-primary)] pb-2" {...props} />
+          h4: ({ node, id, ...props }) => (
+            <h4 id={id} className="text-base font-semibold mt-3 mb-1 text-[var(--color-text-primary)] pb-2 scroll-mt-24" {...props} />
           ),
           p: ({ node, ...props }) => (
             <p className="mb-4 leading-relaxed text-[var(--color-text-primary)]" {...props} />

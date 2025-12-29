@@ -7,6 +7,8 @@ import { PostHeader } from '@/components/post/PostHeader';
 import { PostContent } from '@/components/post/PostContent';
 import { PostTags } from '@/components/post/PostTags';
 import { CommentList } from '@/components/comment/CommentList';
+import { TableOfContents } from '@/components/post/TableOfContents';
+import { extractTocFromMarkdown } from '@/lib/utils/toc';
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
@@ -92,6 +94,9 @@ export default async function PostPage({ params }: PostPageProps) {
   // 태그 조회
   const tags = await getTagsByPostId(post.id);
 
+  // 목차 데이터 추출
+  const tocItems = extractTocFromMarkdown(post.content);
+
   // 구조화된 데이터 (Schema.org Article)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://yujunsun-blog.vercel.app';
   const postUrl = `${siteUrl}/posts/${post.id}`;
@@ -136,14 +141,31 @@ export default async function PostPage({ params }: PostPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <article className="container-width-narrow mx-auto container-padding-x py-8">
-        <PostHeader post={post} />
-        {tags.length > 0 && <PostTags tags={tags} />}
-        <PostContent content={post.content} thumbnailUrl={post.thumbnailUrl} title={post.title} />
-        <CommentList postId={post.id} />
-      </article>
+      {/* flex 레이아웃: 게시글 중앙 + 목차 오른쪽 */}
+      <div className="container-width mx-auto container-padding-x py-8">
+        <div className="flex flex-col lg:flex-row gap-8 lg:items-start">
+          {/* 게시글 콘텐츠 - 목차 너비만큼 margin-left로 중앙 정렬 (viewport에 따라 점진적 감소) */}
+          <article 
+            className="lg:container-width-narrow mx-auto lg:mx-0 min-w-0"
+            style={tocItems.length > 0 ? { marginLeft: 'var(--toc-margin-left)' } : {}}
+          >
+            <PostHeader post={post} />
+            {tags.length > 0 && <PostTags tags={tags} />}
+            <PostContent content={post.content} thumbnailUrl={post.thumbnailUrl} title={post.title} />
+            <CommentList postId={post.id} />
+          </article>
+          
+          {/* 목차 - 오른쪽에 sticky로 배치 */}
+          {tocItems.length > 0 && (
+            <aside className="hidden lg:block w-80 shrink-0 lg:self-stretch">
+              <div className="sticky top-24">
+                <TableOfContents items={tocItems} />
+              </div>
+            </aside>
+          )}
+        </div>
+      </div>
     </>
   );
 }
-
 

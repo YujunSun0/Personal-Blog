@@ -50,11 +50,24 @@
   --container-max-width: 1400px;
   --container-max-width-narrow: 768px; /* 게시글 상세 페이지용 */
   --container-padding-x: 2rem;
+  /* 목차 너비 */
+  --toc-width: 320px; /* w-80 = 20rem = 320px */
+  /* 목차와 게시글 사이 gap (gap-8 = 2rem = 32px) */
+  --toc-gap: 32px;
+  /* 목차 margin-left: 1400px에서 (목차 너비 + gap)만큼, 1024px에서 0px로 점진적 감소 */
+  /* gap을 빼서 실제 간격이 목차 너비와 일치하도록 */
+  --toc-margin-left: clamp(0px, calc((100vw - 1024px) / (1400px - 1024px) * var(--toc-width) - var(--toc-gap)), calc(var(--toc-width) - var(--toc-gap)));
 }
 
 @media (max-width: 1400px) {
   :root {
     --container-padding-x: 1.5rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --toc-margin-left: 0px;
   }
 }
 
@@ -367,4 +380,28 @@ button {
 
 .skip-link:focus {
   top: 0;
+}
+
+/* 전역 커스텀 스크롤바 스타일 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-border-hover);
 }
