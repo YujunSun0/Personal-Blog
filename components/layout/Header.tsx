@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { AuthButtons } from './AuthButtons';
 import { ThemeToggle } from './ThemeToggle';
+import { SearchBox } from '@/components/search/SearchBox';
 
 export function Header() {
   return (
@@ -24,7 +25,10 @@ export function Header() {
             Yujun Sun | Frontend Developer
           </span>
         </Link>
-        <nav className="flex items-center gap-6 md:gap-8" aria-label="주요 네비게이션">
+        <nav className="flex items-center gap-4 md:gap-6" aria-label="주요 네비게이션">
+          <div className="hidden md:block">
+            <SearchBox />
+          </div>
           <Link
             href="/"
             className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 rounded"

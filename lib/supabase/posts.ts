@@ -253,4 +253,52 @@ export async function deletePost(id: string): Promise<void> {
   }
 }
 
+/**
+ * 검색어로 공개된 글 검색 (제목, 설명, 내용에서 검색)
+ */
+export async function searchPublishedPosts(searchQuery: string): Promise<PostListItem[]> {
+  const supabase = await createClient();
+  
+  if (!searchQuery.trim()) {
+    return [];
+  }
+
+  // 제목, 설명, 내용에서 검색
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('is_published', true)
+    .or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to search posts: ${error.message}`);
+  }
+
+  // 각 글의 태그 조회
+  const postsWithTags = await Promise.all(
+    data.map(async (post) => {
+      const { data: postTags } = await supabase
+        .from('post_tags')
+        .select(`
+          tag_id,
+          tags(id, name)
+        `)
+        .eq('post_id', post.id);
+
+      const tags = postTags?.map((pt: any) => ({
+        id: pt.tags.id,
+        name: pt.tags.name,
+      })) || [];
+
+      return {
+        ...mapPostRowToPostListItem(post),
+        tags,
+      };
+    })
+  );
+
+  return postsWithTags;
+}
+
 

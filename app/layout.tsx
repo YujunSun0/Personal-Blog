@@ -50,6 +50,11 @@ export const metadata: Metadata = {
     // Google Search Console 등록 시 추가
     // google: "your-google-verification-code",
   },
+  icons: {
+    icon: '/images/blog_logo-light.png',
+    shortcut: '/images/blog_logo-light.png',
+    apple: '/images/blog_logo-light.png',
+  },
 };
 
 export default function RootLayout({
