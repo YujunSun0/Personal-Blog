@@ -4,15 +4,33 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeHighlight from 'rehype-highlight';
+import Image from 'next/image';
 import 'highlight.js/styles/github-dark.css';
 
 interface PostContentProps {
   content: string;
+  thumbnailUrl?: string | null;
+  title?: string;
 }
 
-export function PostContent({ content }: PostContentProps) {
+export function PostContent({ content, thumbnailUrl, title }: PostContentProps) {
   return (
     <div className="markdown-content">
+      {/* 썸네일 - 글 본문 첫 부분 */}
+      {thumbnailUrl && (
+        <div className="mb-8 rounded-2xl overflow-hidden">
+          <div className="relative w-full" style={{ aspectRatio: '1200/628' }}>
+            <Image
+              src={thumbnailUrl}
+              alt={title || 'Post thumbnail'}
+              fill
+              className="object-cover"
+              priority
+              sizes="100vw"
+            />
+          </div>
+        </div>
+      )}
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw, rehypeHighlight]}

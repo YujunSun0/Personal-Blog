@@ -47,7 +47,7 @@ export function PostCard({ post, href }: PostCardProps) {
             />
           ) : (
             <span className="text-sm">썸네일 이미지</span>
-          )}
+          )}  
         </div>
 
         {/* 콘텐츠 */}

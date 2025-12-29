@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { getPostBySlug } from '@/lib/supabase/posts';
 import { getTagsByPostId } from '@/lib/supabase/tags';
 import { PostHeader } from '@/components/post/PostHeader';
@@ -138,7 +139,7 @@ export default async function PostPage({ params }: PostPageProps) {
       <article className="max-w-[var(--container-max-width)] mx-auto px-[var(--container-padding-x)] py-8">
         <PostHeader post={post} />
         {tags.length > 0 && <PostTags tags={tags} />}
-        <PostContent content={post.content} />
+        <PostContent content={post.content} thumbnailUrl={post.thumbnailUrl} title={post.title} />
         <CommentList postId={post.id} />
       </article>
     </>
