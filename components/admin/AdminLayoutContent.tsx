@@ -65,6 +65,12 @@ export function AdminLayoutContent({ userEmail, children }: AdminLayoutContentPr
                          태그 목록
                        </Link>
                        <Link
+                         href="/dashboard/categories"
+                         className="block px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-bg-secondary)] rounded-md transition-colors whitespace-nowrap"
+                       >
+                         카테고리 관리
+                       </Link>
+                       <Link
                          href="/dashboard/albums"
                          className="block px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-bg-secondary)] rounded-md transition-colors whitespace-nowrap"
                        >
