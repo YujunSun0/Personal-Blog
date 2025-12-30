@@ -48,6 +48,7 @@ export async function getCommentsByPostId(postId: string): Promise<CommentWithAu
   const comments = data as unknown as CommentRow[];
 
   // 회원 댓글의 프로필 정보 일괄 조회
+  // nickname은 공개 정보이므로 RLS 정책에서 허용되어야 함
   const userIds = comments
     .map((row) => row.author_id)
     .filter((id): id is string => id !== null);
@@ -55,12 +56,15 @@ export async function getCommentsByPostId(postId: string): Promise<CommentWithAu
   let profilesMap: Record<string, string | null> = {};
 
   if (userIds.length > 0) {
-    const { data: profiles } = await supabase
+    const { data: profiles, error: profileError } = await supabase
       .from('profiles')
       .select('user_id, nickname')
       .in('user_id', userIds);
 
-    if (profiles) {
+    if (profileError) {
+      console.error('프로필 조회 실패:', profileError);
+      // 프로필 조회 실패해도 댓글은 반환
+    } else if (profiles) {
       const profileRows = profiles as unknown as Array<{ user_id: string; nickname: string | null }>;
       profilesMap = profileRows.reduce((acc, profile) => {
         acc[profile.user_id] = profile.nickname;
@@ -90,7 +94,7 @@ export async function createCommentAsUser(
   postId: string,
   content: string,
   userId: string
-): Promise<Comment> {
+): Promise<CommentWithAuthor> {
   const supabase = await createClient();
 
   const insertData: CommentInsert = {
@@ -121,7 +125,27 @@ export async function createCommentAsUser(
     throw new Error('댓글 작성 실패: 데이터가 없습니다.');
   }
 
-  return mapCommentRowToComment(data);
+  const comment = mapCommentRowToComment(data);
+
+  // 프로필에서 nickname 조회
+  let authorNickname: string | null = null;
+  if (userId) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('nickname')
+      .eq('user_id', userId)
+      .single();
+
+    if (profile) {
+      const profileRow = profile as unknown as { nickname: string | null };
+      authorNickname = profileRow.nickname;
+    }
+  }
+
+  return {
+    ...comment,
+    authorNickname,
+  };
 }
 
 /**
@@ -133,7 +157,7 @@ export async function createCommentAsGuest(
   authorName: string,
   password: string,
   ipAddress: string
-): Promise<Comment> {
+): Promise<CommentWithAuthor> {
   const supabase = await createClient();
 
   // 비밀번호 해시화
@@ -168,7 +192,12 @@ export async function createCommentAsGuest(
     throw new Error('댓글 작성 실패: 데이터가 없습니다.');
   }
 
-  return mapCommentRowToComment(data);
+  const comment = mapCommentRowToComment(data);
+
+  return {
+    ...comment,
+    authorNickname: null, // 비회원은 nickname이 없음
+  };
 }
 
 /**
@@ -206,9 +235,12 @@ export async function updateComment(
   content: string,
   userId?: string
 ): Promise<Comment> {
-  const supabase = await createClient();
+  // RLS 정책 우회를 위해 서비스 역할 사용
+  // 권한 확인은 애플리케이션 레벨에서 수행
+  const { createServiceRoleClient } = await import('./server');
+  const supabase = createServiceRoleClient();
 
-  // 권한 확인
+  // 권한 확인 (회원 댓글 수정 시)
   if (userId) {
     const { data: comment } = await supabase
       .from('comments')
@@ -258,9 +290,12 @@ export async function deleteComment(
   userId?: string,
   isAdmin: boolean = false
 ): Promise<void> {
-  const supabase = await createClient();
+  // RLS 정책 우회를 위해 서비스 역할 사용
+  // 권한 확인은 애플리케이션 레벨에서 수행
+  const { createServiceRoleClient } = await import('./server');
+  const supabase = createServiceRoleClient();
 
-  // 권한 확인
+  // 권한 확인 (회원 댓글 삭제 시)
   if (!isAdmin && userId) {
     const { data: comment } = await supabase
       .from('comments')

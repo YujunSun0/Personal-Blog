@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getAllPosts } from '@/lib/supabase/posts';
 import { PostCard } from '@/components/post/PostCard';
+import { DashboardStats } from '@/components/admin/DashboardStats';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -57,6 +58,14 @@ export default async function DashboardPage() {
             댓글을 확인하고 관리할 수 있습니다.
           </p>
         </div>
+      </div>
+
+      {/* 통계 섹션 */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-[var(--color-text-primary)] mb-4">
+          통계 대시보드
+        </h2>
+        <DashboardStats />
       </div>
 
       {/* 최근 글 목록 */}

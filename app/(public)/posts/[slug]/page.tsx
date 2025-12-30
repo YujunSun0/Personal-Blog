@@ -11,6 +11,7 @@ import { TableOfContents } from '@/components/post/TableOfContents';
 import { extractTocFromMarkdown } from '@/lib/utils/toc';
 import { ViewCountTracker } from '@/components/post/ViewCountTracker';
 import { isAdmin } from '@/lib/supabase/profiles';
+import { PostStatsModal } from '@/components/post/PostStatsModal';
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
@@ -157,6 +158,11 @@ export default async function PostPage({ params }: PostPageProps) {
           >
             <PostHeader post={post} isAdmin={adminStatus} />
             {tags.length > 0 && <PostTags tags={tags} />}
+            {adminStatus && (
+              <div className="mb-6">
+                <PostStatsModal postId={post.id} />
+              </div>
+            )}
             <PostContent content={post.content} thumbnailUrl={post.thumbnailUrl} title={post.title} />
             <CommentList postId={post.id} />
           </article>
