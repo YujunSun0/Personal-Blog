@@ -52,7 +52,7 @@ export function TabNavigation({ typeCounts }: TabNavigationProps) {
           role="tab"
           aria-selected={!selectedType}
           aria-controls="post-list"
-          className={`pb-4 px-1 text-base font-medium transition-colors whitespace-nowrap border-b-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 rounded-t ${
+          className={`pb-4 px-1 text-base font-medium transition-colors whitespace-nowrap border-b-2 outline-none focus:outline-none focus-visible:outline-none active:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 rounded-t ${
             !selectedType
               ? 'text-[var(--color-text-primary)] border-[var(--color-text-primary)]'
               : 'text-[var(--color-text-secondary)] border-transparent hover:text-[var(--color-text-primary)]'
@@ -70,7 +70,7 @@ export function TabNavigation({ typeCounts }: TabNavigationProps) {
             role="tab"
             aria-selected={selectedType === type}
             aria-controls="post-list"
-            className={`pb-4 px-1 text-base font-medium transition-colors whitespace-nowrap border-b-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 rounded-t ${
+            className={`pb-4 px-1 text-base font-medium transition-colors whitespace-nowrap border-b-2 outline-none focus:outline-none focus-visible:outline-none active:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 rounded-t ${
               selectedType === type
                 ? 'text-[var(--color-text-primary)] border-[var(--color-text-primary)]'
                 : 'text-[var(--color-text-secondary)] border-transparent hover:text-[var(--color-text-primary)]'

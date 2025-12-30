@@ -327,6 +327,60 @@ body {
 
 button {
   cursor: pointer;
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-focus-ring-color: transparent;
+}
+
+button:focus {
+  outline: none !important;
+}
+
+button:focus-visible {
+  outline: none !important;
+}
+
+button:active {
+  outline: none !important;
+}
+
+/* 클릭 가능한 요소들의 기본 outline 제거 */
+a:focus,
+button:focus,
+[role="button"]:focus,
+[role="tab"]:focus,
+[role="option"]:focus {
+  outline: none !important;
+}
+
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="option"]:focus-visible {
+  outline: none !important;
+}
+
+a:active,
+button:active,
+[role="button"]:active,
+[role="tab"]:active,
+[role="option"]:active {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 모든 클릭 가능한 요소의 기본 하이라이트 제거 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+*:focus {
+  outline: none !important;
+}
+
+*:active {
+  outline: none !important;
 }
 
 /* 애니메이션 */
@@ -360,8 +414,8 @@ button {
   animation: slide-down 0.3s ease-in;
 }
 
-/* 접근성 개선: 포커스 스타일 */
-*:focus-visible {
+/* 접근성 개선: 키보드 포커스만 스타일 적용 (마우스 클릭 제외) */
+*:focus-visible:not(:active) {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }

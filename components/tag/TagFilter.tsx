@@ -41,7 +41,7 @@ export function TagFilter({ tags }: TagFilterProps) {
         }}
         role="option"
         aria-selected={!selectedTag}
-        className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all text-left focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${
+        className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all text-left outline-none focus:outline-none focus-visible:outline-none active:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 ${
           !selectedTag
             ? 'bg-[var(--color-primary)] text-white shadow-sm'
             : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]'
@@ -64,7 +64,7 @@ export function TagFilter({ tags }: TagFilterProps) {
             role="option"
             aria-selected={selectedTag === tag.name}
             aria-label={`${tag.name} 태그로 필터링 (${tag.postCount}개 글)`}
-            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-left focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${
+            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-left outline-none focus:outline-none focus-visible:outline-none active:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 ${
               selectedTag === tag.name
                 ? 'bg-[var(--color-primary)] text-white shadow-sm'
                 : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]'
