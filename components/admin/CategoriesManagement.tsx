@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { CategoryWithCount } from '@/lib/supabase/categories';
+import { isBlank, trimOrNull, trimOrEmpty } from '@/lib/utils/string';
 
 interface CategoriesManagementProps {
   initialCategories: CategoryWithCount[];
@@ -34,7 +35,7 @@ export function CategoriesManagement({ initialCategories }: CategoriesManagement
   };
 
   const handleCreate = async () => {
-    if (!formData.name.trim() || !formData.slug.trim()) {
+    if (isBlank(formData.name) || isBlank(formData.slug)) {
       toast.error('이름과 slug는 필수입니다.');
       return;
     }
@@ -47,9 +48,9 @@ export function CategoriesManagement({ initialCategories }: CategoriesManagement
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name.trim(),
-          slug: formData.slug.trim(),
-          description: formData.description.trim() || null,
+          name: trimOrEmpty(formData.name),
+          slug: trimOrEmpty(formData.slug),
+          description: trimOrNull(formData.description),
           order: formData.order || undefined,
         }),
       });
@@ -72,7 +73,7 @@ export function CategoriesManagement({ initialCategories }: CategoriesManagement
   };
 
   const handleUpdate = async (id: string) => {
-    if (!formData.name.trim() || !formData.slug.trim()) {
+    if (isBlank(formData.name) || isBlank(formData.slug)) {
       toast.error('이름과 slug는 필수입니다.');
       return;
     }
@@ -85,9 +86,9 @@ export function CategoriesManagement({ initialCategories }: CategoriesManagement
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name.trim(),
-          slug: formData.slug.trim(),
-          description: formData.description.trim() || null,
+          name: trimOrEmpty(formData.name),
+          slug: trimOrEmpty(formData.slug),
+          description: trimOrNull(formData.description),
           order: formData.order,
         }),
       });
