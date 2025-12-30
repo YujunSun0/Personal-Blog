@@ -18,6 +18,7 @@ export function CommentItem({ comment, onCommentUpdated, onCommentDeleted }: Com
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isGuest, setIsGuest] = useState(!comment.authorId);
+  const [isCommentAuthor, setIsCommentAuthor] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -25,7 +26,10 @@ export function CommentItem({ comment, onCommentUpdated, onCommentDeleted }: Com
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      setIsGuest(!user || comment.authorId !== user.id);
+      // 비회원 댓글은 항상 수정/삭제 가능 (비밀번호로 인증)
+      // 회원 댓글은 본인만 수정/삭제 가능
+      setIsGuest(!comment.authorId);
+      setIsCommentAuthor(user ? comment.authorId === user.id : false);
     };
     checkAuth();
   }, [comment.authorId]);
@@ -155,7 +159,8 @@ export function CommentItem({ comment, onCommentUpdated, onCommentDeleted }: Com
             {comment.updatedAt !== comment.createdAt && ' (수정됨)'}
           </span>
         </div>
-        {!isGuest && (
+        {/* 비회원 댓글은 모두 수정/삭제 가능, 회원 댓글은 본인만 가능 */}
+        {!isDeleting && (isGuest || isCommentAuthor) && (
           <div className="flex gap-2">
             {isEditing ? (
               <>
