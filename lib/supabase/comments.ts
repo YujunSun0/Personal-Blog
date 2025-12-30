@@ -45,8 +45,10 @@ export async function getCommentsByPostId(postId: string): Promise<CommentWithAu
     return [];
   }
 
+  const comments = data as unknown as CommentRow[];
+
   // 회원 댓글의 프로필 정보 일괄 조회
-  const userIds = data
+  const userIds = comments
     .map((row) => row.author_id)
     .filter((id): id is string => id !== null);
 
@@ -59,7 +61,8 @@ export async function getCommentsByPostId(postId: string): Promise<CommentWithAu
       .in('user_id', userIds);
 
     if (profiles) {
-      profilesMap = profiles.reduce((acc, profile) => {
+      const profileRows = profiles as unknown as Array<{ user_id: string; nickname: string | null }>;
+      profilesMap = profileRows.reduce((acc, profile) => {
         acc[profile.user_id] = profile.nickname;
         return acc;
       }, {} as Record<string, string | null>);
@@ -67,7 +70,7 @@ export async function getCommentsByPostId(postId: string): Promise<CommentWithAu
   }
 
   // 댓글과 프로필 정보 결합
-  const commentsWithAuthor: CommentWithAuthor[] = data.map((row) => {
+  const commentsWithAuthor: CommentWithAuthor[] = comments.map((row) => {
     const comment = mapCommentRowToComment(row);
     const authorNickname = row.author_id ? profilesMap[row.author_id] || null : null;
 
@@ -90,20 +93,32 @@ export async function createCommentAsUser(
 ): Promise<Comment> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from('comments')
-    .insert({
-      post_id: postId,
-      content,
-      author_id: userId,
-      author_name: null,
-      password_hash: null,
+  const insertData: CommentInsert = {
+    post_id: postId,
+    content,
+    author_id: userId,
+    author_name: null,
+    password_hash: null,
+  };
+
+  const { data, error } = await (supabase
+    .from('comments') as unknown as {
+      insert: (values: CommentInsert) => {
+        select: () => {
+          single: () => Promise<{ data: CommentRow | null; error: { message: string } | null }>;
+        };
+      };
     })
+    .insert(insertData)
     .select()
     .single();
 
   if (error) {
     throw new Error(`댓글 작성 실패: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error('댓글 작성 실패: 데이터가 없습니다.');
   }
 
   return mapCommentRowToComment(data);
@@ -124,21 +139,33 @@ export async function createCommentAsGuest(
   // 비밀번호 해시화
   const passwordHash = await bcrypt.hash(password, 10);
 
-  const { data, error } = await supabase
-    .from('comments')
-    .insert({
-      post_id: postId,
-      content,
-      author_name: authorName,
-      author_id: null,
-      password_hash: passwordHash,
-      ip_address: ipAddress,
+  const insertData: CommentInsert = {
+    post_id: postId,
+    content,
+    author_name: authorName,
+    author_id: null,
+    password_hash: passwordHash,
+    ip_address: ipAddress,
+  };
+
+  const { data, error } = await (supabase
+    .from('comments') as unknown as {
+      insert: (values: CommentInsert) => {
+        select: () => {
+          single: () => Promise<{ data: CommentRow | null; error: { message: string } | null }>;
+        };
+      };
     })
+    .insert(insertData)
     .select()
     .single();
 
   if (error) {
     throw new Error(`댓글 작성 실패: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error('댓글 작성 실패: 데이터가 없습니다.');
   }
 
   return mapCommentRowToComment(data);
@@ -159,11 +186,16 @@ export async function verifyCommentPassword(
     .eq('id', commentId)
     .single();
 
-  if (error || !data || !data.password_hash) {
+  if (error || !data) {
     return false;
   }
 
-  return bcrypt.compare(password, data.password_hash);
+  const row = data as unknown as Pick<CommentRow, 'password_hash'>;
+  if (!row.password_hash) {
+    return false;
+  }
+
+  return bcrypt.compare(password, row.password_hash);
 }
 
 /**
@@ -184,20 +216,35 @@ export async function updateComment(
       .eq('id', commentId)
       .single();
 
-    if (!comment || comment.author_id !== userId) {
+    const commentRow = comment as unknown as Pick<CommentRow, 'author_id'> | null;
+    if (!commentRow || commentRow.author_id !== userId) {
       throw new Error('댓글 수정 권한이 없습니다.');
     }
   }
 
-  const { data, error } = await supabase
-    .from('comments')
-    .update({ content })
+  const updateData: CommentUpdate = { content };
+
+  const { data, error } = await (supabase
+    .from('comments') as unknown as {
+      update: (values: CommentUpdate) => {
+        eq: (column: string, value: string) => {
+          select: () => {
+            single: () => Promise<{ data: CommentRow | null; error: { message: string } | null }>;
+          };
+        };
+      };
+    })
+    .update(updateData)
     .eq('id', commentId)
     .select()
     .single();
 
   if (error) {
     throw new Error(`댓글 수정 실패: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error('댓글 수정 실패: 데이터가 없습니다.');
   }
 
   return mapCommentRowToComment(data);
@@ -221,17 +268,24 @@ export async function deleteComment(
       .eq('id', commentId)
       .single();
 
-    if (!comment || comment.author_id !== userId) {
+    const commentRow = comment as unknown as Pick<CommentRow, 'author_id'> | null;
+    if (!commentRow || commentRow.author_id !== userId) {
       throw new Error('댓글 삭제 권한이 없습니다.');
     }
   }
 
-  const { error } = await supabase
-    .from('comments')
-    .update({
-      is_deleted: true,
-      deleted_at: new Date().toISOString(),
+  const updateData: CommentUpdate = {
+    is_deleted: true,
+    deleted_at: new Date().toISOString(),
+  };
+
+  const { error } = await (supabase
+    .from('comments') as unknown as {
+      update: (values: CommentUpdate) => {
+        eq: (column: string, value: string) => Promise<{ error: { message: string } | null }>;
+      };
     })
+    .update(updateData)
     .eq('id', commentId);
 
   if (error) {

@@ -5,6 +5,7 @@ import type { Tag } from '@/types/tag';
 type TagRow = Database['public']['Tables']['tags']['Row'];
 type TagInsert = Database['public']['Tables']['tags']['Insert'];
 type TagUpdate = Database['public']['Tables']['tags']['Update'];
+type PostTagInsert = Database['public']['Tables']['post_tags']['Insert'];
 
 /**
  * 데이터베이스 Row를 Tag 타입으로 변환
@@ -31,7 +32,8 @@ export async function getAllTags(): Promise<Tag[]> {
     throw new Error(`Failed to fetch tags: ${error.message}`);
   }
 
-  return data.map(mapTagRowToTag);
+  const tags = data as unknown as TagRow[];
+  return tags.map(mapTagRowToTag);
 }
 
 /**
@@ -53,7 +55,8 @@ export async function getTagById(id: string): Promise<Tag | null> {
     throw new Error(`Failed to fetch tag: ${error.message}`);
   }
 
-  return mapTagRowToTag(data);
+  const tag = data as unknown as TagRow;
+  return mapTagRowToTag(tag);
 }
 
 /**
@@ -75,7 +78,8 @@ export async function getTagByName(name: string): Promise<Tag | null> {
     throw new Error(`Failed to fetch tag: ${error.message}`);
   }
 
-  return mapTagRowToTag(data);
+  const tag = data as unknown as TagRow;
+  return mapTagRowToTag(tag);
 }
 
 /**
@@ -88,8 +92,14 @@ export async function createTag(name: string): Promise<Tag> {
     name: name.trim(),
   };
 
-  const { data, error } = await supabase
-    .from('tags')
+  const { data, error } = await (supabase
+    .from('tags') as unknown as {
+      insert: (values: TagInsert) => {
+        select: () => {
+          single: () => Promise<{ data: TagRow | null; error: { message: string; code?: string } | null }>;
+        };
+      };
+    })
     .insert(insertData)
     .select()
     .single();
@@ -105,6 +115,10 @@ export async function createTag(name: string): Promise<Tag> {
     throw new Error(`Failed to create tag: ${error.message}`);
   }
 
+  if (!data) {
+    throw new Error('Failed to create tag: 데이터가 없습니다.');
+  }
+
   return mapTagRowToTag(data);
 }
 
@@ -118,8 +132,16 @@ export async function updateTag(id: string, name: string): Promise<Tag> {
     name: name.trim(),
   };
 
-  const { data, error } = await supabase
-    .from('tags')
+  const { data, error } = await (supabase
+    .from('tags') as unknown as {
+      update: (values: TagUpdate) => {
+        eq: (column: string, value: string) => {
+          select: () => {
+            single: () => Promise<{ data: TagRow | null; error: { message: string } | null }>;
+          };
+        };
+      };
+    })
     .update(updateData)
     .eq('id', id)
     .select()
@@ -127,6 +149,10 @@ export async function updateTag(id: string, name: string): Promise<Tag> {
 
   if (error) {
     throw new Error(`Failed to update tag: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error('Failed to update tag: 데이터가 없습니다.');
   }
 
   return mapTagRowToTag(data);
@@ -167,7 +193,8 @@ export async function getAllTagsWithCount(): Promise<TagWithCount[]> {
     throw new Error(`Failed to fetch tags with count: ${error.message}`);
   }
 
-  return data.map((tag) => ({
+  const tags = data as unknown as Array<TagRow & { post_tags?: unknown[] }>;
+  return tags.map((tag) => ({
     id: tag.id,
     name: tag.name,
     postCount: Array.isArray(tag.post_tags) ? tag.post_tags.length : 0,
@@ -190,7 +217,8 @@ export async function getPublishedTagsWithCount(): Promise<TagWithCount[]> {
     throw new Error(`Failed to fetch published posts: ${postsError.message}`);
   }
 
-  const publishedPostIds = publishedPosts.map((p) => p.id);
+  const posts = publishedPosts as unknown as Array<Pick<Database['public']['Tables']['posts']['Row'], 'id'>>;
+  const publishedPostIds = posts.map((p) => p.id);
 
   if (publishedPostIds.length === 0) {
     return [];
@@ -206,9 +234,11 @@ export async function getPublishedTagsWithCount(): Promise<TagWithCount[]> {
     throw new Error(`Failed to fetch post tags: ${postTagsError.message}`);
   }
 
+  const postTagRows = postTags as unknown as Array<Pick<Database['public']['Tables']['post_tags']['Row'], 'tag_id'>>;
+
   // 태그별 개수 집계
   const tagCountMap = new Map<string, number>();
-  postTags.forEach((pt) => {
+  postTagRows.forEach((pt) => {
     const count = tagCountMap.get(pt.tag_id) || 0;
     tagCountMap.set(pt.tag_id, count + 1);
   });
@@ -229,7 +259,8 @@ export async function getPublishedTagsWithCount(): Promise<TagWithCount[]> {
     throw new Error(`Failed to fetch tags: ${tagsError.message}`);
   }
 
-  return tags.map((tag) => ({
+  const tagRows = tags as unknown as TagRow[];
+  return tagRows.map((tag) => ({
     id: tag.id,
     name: tag.name,
     postCount: tagCountMap.get(tag.id) || 0,
@@ -254,7 +285,11 @@ export async function getTagsByPostId(postId: string): Promise<Tag[]> {
     throw new Error(`Failed to fetch tags for post: ${error.message}`);
   }
 
-  return data.map((item: any) => mapTagRowToTag(item.tags));
+  const items = data as unknown as Array<{
+    tag_id: string;
+    tags: TagRow;
+  }>;
+  return items.map((item) => mapTagRowToTag(item.tags));
 }
 
 /**
@@ -263,12 +298,16 @@ export async function getTagsByPostId(postId: string): Promise<Tag[]> {
 export async function connectPostToTag(postId: string, tagId: string): Promise<void> {
   const supabase = await createClient();
 
-  const { error } = await supabase
-    .from('post_tags')
-    .insert({
-      post_id: postId,
-      tag_id: tagId,
-    });
+  const insertData: PostTagInsert = {
+    post_id: postId,
+    tag_id: tagId,
+  };
+
+  const { error } = await (supabase
+    .from('post_tags') as unknown as {
+      insert: (values: PostTagInsert) => Promise<{ error: { message: string; code?: string } | null }>;
+    })
+    .insert(insertData);
 
   if (error) {
     // 이미 연결되어 있는 경우 무시

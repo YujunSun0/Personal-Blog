@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { isAdmin } from '@/lib/supabase/profiles';
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -16,14 +17,8 @@ export async function GET(request: Request) {
     } = await supabase.auth.getUser();
 
     if (user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single();
-
       // 관리자인 경우 대시보드로, 일반 사용자는 홈으로 리다이렉트
-      if (profile?.role === 'admin') {
+      if (await isAdmin(user.id)) {
         return NextResponse.redirect(`${origin}/dashboard`);
       }
     }

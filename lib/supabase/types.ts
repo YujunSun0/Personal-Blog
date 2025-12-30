@@ -223,47 +223,6 @@ export interface Database {
           created_at?: string;
         };
       };
-      comments: {
-        Row: {
-          id: string;
-          post_id: string;
-          content: string;
-          author_name: string | null;
-          author_id: string | null;
-          password_hash: string | null;
-          ip_address: string | null;
-          is_deleted: boolean;
-          deleted_at: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          post_id: string;
-          content: string;
-          author_name?: string | null;
-          author_id?: string | null;
-          password_hash?: string | null;
-          ip_address?: string | null;
-          is_deleted?: boolean;
-          deleted_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          post_id?: string;
-          content?: string;
-          author_name?: string | null;
-          author_id?: string | null;
-          password_hash?: string | null;
-          ip_address?: string | null;
-          is_deleted?: boolean;
-          deleted_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
     };
     Views: {
       [_ in never]: never;

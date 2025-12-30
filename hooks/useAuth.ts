@@ -4,6 +4,9 @@ import { useEffect, useState, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { UserRole } from '@/types/profile';
+import type { Database } from '@/lib/supabase/types';
+
+type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -23,7 +26,8 @@ export function useAuth() {
           .single();
 
         if (!error && data) {
-          setRole(data.role as UserRole);
+          const profile = data as Pick<ProfileRow, 'role'>;
+          setRole(profile.role as UserRole);
         } else {
           setRole(null);
         }

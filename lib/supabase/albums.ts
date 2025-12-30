@@ -1,5 +1,19 @@
 import { createClient } from '@/lib/supabase/server';
 import type { Album, AlbumListItem, AlbumWithImages } from '@/types/album';
+import type { Database } from './types';
+
+type AlbumRow = Database['public']['Tables']['albums']['Row'];
+type AlbumInsert = Database['public']['Tables']['albums']['Insert'];
+type AlbumUpdate = Database['public']['Tables']['albums']['Update'];
+type AlbumImageRow = Database['public']['Tables']['album_images']['Row'];
+
+type AlbumWithImagesRow = AlbumRow & {
+  album_images?: Array<{ id: string }>;
+};
+
+type AlbumWithFullImagesRow = AlbumRow & {
+  album_images?: Array<AlbumImageRow>;
+};
 
 /**
  * 공개된 모든 앨범 목록 조회
@@ -20,16 +34,19 @@ export async function getPublishedAlbums(): Promise<AlbumListItem[]> {
     throw new Error(`앨범 목록 조회 실패: ${error.message}`);
   }
 
-  return (data || []).map((row) => ({
-    id: row.id,
-    title: row.title,
-    description: row.description,
-    coverImageUrl: row.cover_image_url,
-    isPublished: row.is_published,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    imageCount: (row.album_images as any[])?.length || 0,
-  }));
+  return (data || []).map((row: unknown) => {
+    const album = row as AlbumWithImagesRow;
+    return {
+      id: album.id,
+      title: album.title,
+      description: album.description,
+      coverImageUrl: album.cover_image_url,
+      isPublished: album.is_published,
+      createdAt: album.created_at,
+      updatedAt: album.updated_at,
+      imageCount: album.album_images?.length || 0,
+    };
+  });
 }
 
 /**
@@ -50,16 +67,19 @@ export async function getAllAlbums(): Promise<AlbumListItem[]> {
     throw new Error(`앨범 목록 조회 실패: ${error.message}`);
   }
 
-  return (data || []).map((row) => ({
-    id: row.id,
-    title: row.title,
-    description: row.description,
-    coverImageUrl: row.cover_image_url,
-    isPublished: row.is_published,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    imageCount: (row.album_images as any[])?.length || 0,
-  }));
+  return (data || []).map((row: unknown) => {
+    const album = row as AlbumWithImagesRow;
+    return {
+      id: album.id,
+      title: album.title,
+      description: album.description,
+      coverImageUrl: album.cover_image_url,
+      isPublished: album.is_published,
+      createdAt: album.created_at,
+      updatedAt: album.updated_at,
+      imageCount: album.album_images?.length || 0,
+    };
+  });
 }
 
 /**
@@ -84,15 +104,17 @@ export async function getAlbumById(id: string): Promise<AlbumWithImages | null> 
     throw new Error(`앨범 조회 실패: ${error.message}`);
   }
 
+  const album = data as AlbumWithFullImagesRow;
+
   return {
-    id: data.id,
-    title: data.title,
-    description: data.description,
-    coverImageUrl: data.cover_image_url,
-    isPublished: data.is_published,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
-    images: (data.album_images as any[])
+    id: album.id,
+    title: album.title,
+    description: album.description,
+    coverImageUrl: album.cover_image_url,
+    isPublished: album.is_published,
+    createdAt: album.created_at,
+    updatedAt: album.updated_at,
+    images: (album.album_images || [])
       .map((img) => ({
         id: img.id,
         albumId: img.album_id,
@@ -109,7 +131,7 @@ export async function getAlbumById(id: string): Promise<AlbumWithImages | null> 
 /**
  * 앨범 생성
  */
-export async function createAlbum(album: {
+export async function createAlbum(albumData: {
   title: string;
   description?: string;
   coverImageUrl?: string;
@@ -117,14 +139,22 @@ export async function createAlbum(album: {
 }): Promise<Album> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from('albums')
-    .insert({
-      title: album.title,
-      description: album.description || null,
-      cover_image_url: album.coverImageUrl || null,
-      is_published: album.isPublished ?? false,
+  const insertData: AlbumInsert = {
+    title: albumData.title,
+    description: albumData.description || null,
+    cover_image_url: albumData.coverImageUrl || null,
+    is_published: albumData.isPublished ?? false,
+  };
+
+  const { data, error } = await (supabase
+    .from('albums') as unknown as {
+      insert: (values: AlbumInsert) => {
+        select: () => {
+          single: () => Promise<{ data: AlbumRow | null; error: { message: string } | null }>;
+        };
+      };
     })
+    .insert(insertData)
     .select()
     .single();
 
@@ -132,14 +162,16 @@ export async function createAlbum(album: {
     throw new Error(`앨범 생성 실패: ${error.message}`);
   }
 
+  const album = data as AlbumRow;
+
   return {
-    id: data.id,
-    title: data.title,
-    description: data.description,
-    coverImageUrl: data.cover_image_url,
-    isPublished: data.is_published,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
+    id: album.id,
+    title: album.title,
+    description: album.description,
+    coverImageUrl: album.cover_image_url,
+    isPublished: album.is_published,
+    createdAt: album.created_at,
+    updatedAt: album.updated_at,
   };
 }
 
@@ -157,14 +189,22 @@ export async function updateAlbum(
 ): Promise<Album> {
   const supabase = await createClient();
 
-  const updateData: any = {};
+  const updateData: AlbumUpdate = {};
   if (updates.title !== undefined) updateData.title = updates.title;
   if (updates.description !== undefined) updateData.description = updates.description;
   if (updates.coverImageUrl !== undefined) updateData.cover_image_url = updates.coverImageUrl;
   if (updates.isPublished !== undefined) updateData.is_published = updates.isPublished;
 
-  const { data, error } = await supabase
-    .from('albums')
+  const { data, error } = await (supabase
+    .from('albums') as unknown as {
+      update: (values: AlbumUpdate) => {
+        eq: (column: string, value: string) => {
+          select: () => {
+            single: () => Promise<{ data: AlbumRow | null; error: { message: string } | null }>;
+          };
+        };
+      };
+    })
     .update(updateData)
     .eq('id', id)
     .select()
@@ -174,14 +214,16 @@ export async function updateAlbum(
     throw new Error(`앨범 수정 실패: ${error.message}`);
   }
 
+  const album = data as AlbumRow;
+
   return {
-    id: data.id,
-    title: data.title,
-    description: data.description,
-    coverImageUrl: data.cover_image_url,
-    isPublished: data.is_published,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
+    id: album.id,
+    title: album.title,
+    description: album.description,
+    coverImageUrl: album.cover_image_url,
+    isPublished: album.is_published,
+    createdAt: album.created_at,
+    updatedAt: album.updated_at,
   };
 }
 

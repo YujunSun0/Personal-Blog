@@ -5,6 +5,8 @@ import type { Post, PostListItem } from '@/types/post';
 type PostRow = Database['public']['Tables']['posts']['Row'];
 type PostInsert = Database['public']['Tables']['posts']['Insert'];
 type PostUpdate = Database['public']['Tables']['posts']['Update'];
+type TagRow = Database['public']['Tables']['tags']['Row'];
+type PostTagRow = Database['public']['Tables']['post_tags']['Row'];
 
 /**
  * 데이터베이스 Row를 Post 타입으로 변환
@@ -76,17 +78,20 @@ export async function getPublishedPosts(
       return []; // 태그가 없으면 빈 배열 반환
     }
 
+    const tag = tagData as unknown as Pick<TagRow, 'id'>;
+
     // 해당 태그가 연결된 글 ID 찾기
     const { data: postTagsData, error: postTagsError } = await supabase
       .from('post_tags')
       .select('post_id')
-      .eq('tag_id', tagData.id);
+      .eq('tag_id', tag.id);
 
     if (postTagsError || !postTagsData || postTagsData.length === 0) {
       return [];
     }
 
-    postIds = postTagsData.map((pt) => pt.post_id);
+    const postTags = postTagsData as unknown as Array<Pick<PostTagRow, 'post_id'>>;
+    postIds = postTags.map((pt) => pt.post_id);
   }
 
   // 글 조회
@@ -111,9 +116,11 @@ export async function getPublishedPosts(
     throw new Error(`Failed to fetch published posts: ${error.message}`);
   }
 
+  const posts = data as unknown as PostRow[];
+
   // 각 글의 태그 조회
   const postsWithTags = await Promise.all(
-    data.map(async (post) => {
+    posts.map(async (post) => {
       const { data: postTags } = await supabase
         .from('post_tags')
         .select(`
@@ -122,7 +129,12 @@ export async function getPublishedPosts(
         `)
         .eq('post_id', post.id);
 
-      const tags = postTags?.map((pt: any) => ({
+      const tagsData = postTags as unknown as Array<{
+        tag_id: string;
+        tags: Pick<TagRow, 'id' | 'name'>;
+      }> | null;
+
+      const tags = tagsData?.map((pt) => ({
         id: pt.tags.id,
         name: pt.tags.name,
       })) || [];
@@ -152,7 +164,8 @@ export async function getAllPosts(): Promise<PostListItem[]> {
     throw new Error(`Failed to fetch all posts: ${error.message}`);
   }
 
-  return data.map(mapPostRowToPostListItem);
+  const posts = data as unknown as PostRow[];
+  return posts.map(mapPostRowToPostListItem);
 }
 
 /**
@@ -175,7 +188,8 @@ export async function getPostById(id: string): Promise<Post | null> {
     throw new Error(`Failed to fetch post: ${error.message}`);
   }
 
-  return mapPostRowToPost(data);
+  const post = data as unknown as PostRow;
+  return mapPostRowToPost(post);
 }
 
 /**
@@ -195,14 +209,24 @@ export async function createPost(
 
   const insertData = mapPostToInsert(post);
 
-  const { data, error } = await supabase
-    .from('posts')
+  const { data, error } = await (supabase
+    .from('posts') as unknown as {
+      insert: (values: PostInsert) => {
+        select: () => {
+          single: () => Promise<{ data: PostRow | null; error: { message: string } | null }>;
+        };
+      };
+    })
     .insert(insertData)
     .select()
     .single();
 
   if (error) {
     throw new Error(`Failed to create post: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error('Failed to create post: 데이터가 없습니다.');
   }
 
   return mapPostRowToPost(data);
@@ -226,8 +250,16 @@ export async function updatePost(
   if (updates.thumbnailUrl !== undefined) updateData.thumbnail_url = updates.thumbnailUrl;
   if (updates.isPublished !== undefined) updateData.is_published = updates.isPublished;
 
-  const { data, error } = await supabase
-    .from('posts')
+  const { data, error } = await (supabase
+    .from('posts') as unknown as {
+      update: (values: PostUpdate) => {
+        eq: (column: string, value: string) => {
+          select: () => {
+            single: () => Promise<{ data: PostRow | null; error: { message: string } | null }>;
+          };
+        };
+      };
+    })
     .update(updateData)
     .eq('id', id)
     .select()
@@ -235,6 +267,10 @@ export async function updatePost(
 
   if (error) {
     throw new Error(`Failed to update post: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error('Failed to update post: 데이터가 없습니다.');
   }
 
   return mapPostRowToPost(data);
@@ -275,9 +311,11 @@ export async function searchPublishedPosts(searchQuery: string): Promise<PostLis
     throw new Error(`Failed to search posts: ${error.message}`);
   }
 
+  const posts = data as unknown as PostRow[];
+
   // 각 글의 태그 조회
   const postsWithTags = await Promise.all(
-    data.map(async (post) => {
+    posts.map(async (post) => {
       const { data: postTags } = await supabase
         .from('post_tags')
         .select(`
@@ -286,7 +324,12 @@ export async function searchPublishedPosts(searchQuery: string): Promise<PostLis
         `)
         .eq('post_id', post.id);
 
-      const tags = postTags?.map((pt: any) => ({
+      const tagsData = postTags as unknown as Array<{
+        tag_id: string;
+        tags: Pick<TagRow, 'id' | 'name'>;
+      }> | null;
+
+      const tags = tagsData?.map((pt) => ({
         id: pt.tags.id,
         name: pt.tags.name,
       })) || [];

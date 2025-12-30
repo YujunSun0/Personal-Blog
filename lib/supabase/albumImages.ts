@@ -1,5 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 import type { AlbumImage } from '@/types/album';
+import type { Database } from './types';
+
+type AlbumImageRow = Database['public']['Tables']['album_images']['Row'];
+type AlbumImageInsert = Database['public']['Tables']['album_images']['Insert'];
+type AlbumImageUpdate = Database['public']['Tables']['album_images']['Update'];
 
 /**
  * 앨범의 모든 이미지 조회
@@ -17,15 +22,18 @@ export async function getAlbumImages(albumId: string): Promise<AlbumImage[]> {
     throw new Error(`앨범 이미지 조회 실패: ${error.message}`);
   }
 
-  return (data || []).map((row) => ({
-    id: row.id,
-    albumId: row.album_id,
-    imageUrl: row.image_url,
-    title: row.title,
-    description: row.description,
-    position: row.position,
-    createdAt: row.created_at,
-  }));
+  return (data || []).map((row) => {
+    const image = row as AlbumImageRow;
+    return {
+      id: image.id,
+      albumId: image.album_id,
+      imageUrl: image.image_url,
+      title: image.title,
+      description: image.description,
+      position: image.position,
+      createdAt: image.created_at,
+    };
+  });
 }
 
 /**
@@ -79,15 +87,17 @@ export async function addAlbumImage(image: {
       : 0;
   }
 
+  const insertData: AlbumImageInsert = {
+    album_id: image.albumId,
+    image_url: image.imageUrl,
+    title: image.title || null,
+    description: image.description || null,
+    position: image.position,
+  };
+
   const { data, error } = await supabase
     .from('album_images')
-    .insert({
-      album_id: image.albumId,
-      image_url: image.imageUrl,
-      title: image.title || null,
-      description: image.description || null,
-      position: image.position,
-    })
+    .insert(insertData as any)
     .select()
     .single();
 
@@ -95,14 +105,16 @@ export async function addAlbumImage(image: {
     throw new Error(`앨범 이미지 추가 실패: ${error.message}`);
   }
 
+  const insertedImage = data as AlbumImageRow;
+
   return {
-    id: data.id,
-    albumId: data.album_id,
-    imageUrl: data.image_url,
-    title: data.title,
-    description: data.description,
-    position: data.position,
-    createdAt: data.created_at,
+    id: insertedImage.id,
+    albumId: insertedImage.album_id,
+    imageUrl: insertedImage.image_url,
+    title: insertedImage.title,
+    description: insertedImage.description,
+    position: insertedImage.position,
+    createdAt: insertedImage.created_at,
   };
 }
 
@@ -124,8 +136,8 @@ export async function updateAlbumImage(
   if (updates.description !== undefined) updateData.description = updates.description;
   if (updates.position !== undefined) updateData.position = updates.position;
 
-  const { data, error } = await supabase
-    .from('album_images')
+  const { data, error } = await (supabase
+    .from('album_images') as any)
     .update(updateData)
     .eq('id', id)
     .select()
@@ -135,14 +147,16 @@ export async function updateAlbumImage(
     throw new Error(`앨범 이미지 수정 실패: ${error.message}`);
   }
 
+  const updatedImage = data as AlbumImageRow;
+
   return {
-    id: data.id,
-    albumId: data.album_id,
-    imageUrl: data.image_url,
-    title: data.title,
-    description: data.description,
-    position: data.position,
-    createdAt: data.created_at,
+    id: updatedImage.id,
+    albumId: updatedImage.album_id,
+    imageUrl: updatedImage.image_url,
+    title: updatedImage.title,
+    description: updatedImage.description,
+    position: updatedImage.position,
+    createdAt: updatedImage.created_at,
   };
 }
 
