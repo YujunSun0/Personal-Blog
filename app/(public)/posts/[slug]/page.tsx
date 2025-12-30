@@ -9,6 +9,8 @@ import { PostTags } from '@/components/post/PostTags';
 import { CommentList } from '@/components/comment/CommentList';
 import { TableOfContents } from '@/components/post/TableOfContents';
 import { extractTocFromMarkdown } from '@/lib/utils/toc';
+import { ViewCountTracker } from '@/components/post/ViewCountTracker';
+import { isAdmin } from '@/lib/supabase/profiles';
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
@@ -97,6 +99,9 @@ export default async function PostPage({ params }: PostPageProps) {
   // 목차 데이터 추출
   const tocItems = extractTocFromMarkdown(post.content);
 
+  // 관리자 여부 확인
+  const adminStatus = await isAdmin();
+
   // 구조화된 데이터 (Schema.org Article)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://yujunsun-blog.vercel.app';
   const postUrl = `${siteUrl}/posts/${post.id}`;
@@ -141,6 +146,7 @@ export default async function PostPage({ params }: PostPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
+      <ViewCountTracker postId={post.id} />
       {/* flex 레이아웃: 게시글 중앙 + 목차 오른쪽 */}
       <div className="container-width mx-auto container-padding-x py-8">
         <div className="flex flex-col lg:flex-row gap-8 lg:items-start">
@@ -149,7 +155,7 @@ export default async function PostPage({ params }: PostPageProps) {
             className="lg:container-width-narrow mx-auto lg:mx-0 min-w-0"
             style={tocItems.length > 0 ? { marginLeft: 'var(--toc-margin-left)' } : {}}
           >
-            <PostHeader post={post} />
+            <PostHeader post={post} isAdmin={adminStatus} />
             {tags.length > 0 && <PostTags tags={tags} />}
             <PostContent content={post.content} thumbnailUrl={post.thumbnailUrl} title={post.title} />
             <CommentList postId={post.id} />

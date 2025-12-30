@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSearchHistory, addSearchHistory, removeSearchHistory } from '@/lib/utils/searchHistory';
+import { fetchTagsWithCache } from '@/lib/utils/tagsCache';
 import type { TagWithCount } from '@/lib/supabase/tags';
 
 // 아이콘 컴포넌트
@@ -40,28 +41,27 @@ export function SearchBox() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  // 최근 검색어 로드
-  useEffect(() => {
+  // 최근 검색어 상태 업데이트 헬퍼 함수
+  const updateRecentSearches = () => {
     const history = getSearchHistory();
     setRecentSearches(history.map(item => item.query));
-  }, []);
+  };
 
-  // 태그 로드
+  // 최근 검색어 로드 (드롭다운이 열릴 때마다 최신화)
+  useEffect(() => {
+    if (isOpen) {
+      updateRecentSearches();
+    }
+  }, [isOpen]);
+
+  // 태그 로드 (캐시 사용)
   useEffect(() => {
     if (isOpen) {
       setIsLoadingTags(true);
-      fetch('/api/tags/public')
-        .then(res => res.json())
-        .then(data => {
-          setTags(data || []);
-        })
-        .catch(error => {
-          console.error('Failed to fetch tags:', error);
-          setTags([]);
-        })
-        .finally(() => {
-          setIsLoadingTags(false);
-        });
+      fetchTagsWithCache().then(data => {
+        setTags(data);
+        setIsLoadingTags(false);
+      });
     }
   }, [isOpen]);
 
@@ -86,6 +86,9 @@ export function SearchBox() {
     // 검색 기록 추가
     addSearchHistory(trimmedQuery);
     
+    // 최근 검색어 상태 즉시 업데이트
+    updateRecentSearches();
+    
     // 검색 결과 페이지로 이동
     router.push(`/search?q=${encodeURIComponent(trimmedQuery)}`);
     setIsOpen(false);
@@ -107,8 +110,7 @@ export function SearchBox() {
   const handleRemoveRecent = (e: React.MouseEvent, searchQuery: string) => {
     e.stopPropagation();
     removeSearchHistory(searchQuery);
-    const history = getSearchHistory();
-    setRecentSearches(history.map(item => item.query));
+    updateRecentSearches();
   };
 
   return (

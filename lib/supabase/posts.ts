@@ -20,6 +20,7 @@ function mapPostRowToPost(row: PostRow): Post {
     type: row.type,
     thumbnailUrl: row.thumbnail_url,
     isPublished: row.is_published,
+    viewCount: row.view_count ?? 0,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -35,6 +36,7 @@ function mapPostRowToPostListItem(row: PostRow): PostListItem {
     description: row.description,
     type: row.type,
     thumbnailUrl: row.thumbnail_url,
+    viewCount: row.view_count ?? 0,
     createdAt: row.created_at,
   };
 }

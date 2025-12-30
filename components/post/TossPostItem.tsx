@@ -1,13 +1,17 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import type { PostListItem } from '@/types/post';
 import { TagBadge } from '@/components/tag/TagBadge';
+import { useAuth } from '@/hooks/useAuth';
 
 interface TossPostItemProps {
   post: PostListItem;
 }
 
 export function TossPostItem({ post }: TossPostItemProps) {
+  const { isAdmin } = useAuth();
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
@@ -58,7 +62,7 @@ export function TossPostItem({ post }: TossPostItemProps) {
               </div>
             )}
 
-            {/* 날짜 및 타입 뱃지 */}
+            {/* 날짜, 타입 뱃지 및 조회수 */}
             <div className="flex items-center gap-3 text-sm text-[var(--color-text-tertiary)]">
               <span>{formatDate(post.createdAt)}</span>
               <span
@@ -68,6 +72,30 @@ export function TossPostItem({ post }: TossPostItemProps) {
               >
                 {post.type}
               </span>
+              {isAdmin && post.viewCount !== undefined && (
+                <span className="flex items-center gap-1">
+                  <svg
+                    className="w-3.5 h-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                  {post.viewCount.toLocaleString()}
+                </span>
+              )}
             </div>
           </div>
         </div>

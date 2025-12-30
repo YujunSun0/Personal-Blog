@@ -1,5 +1,5 @@
 const SEARCH_HISTORY_KEY = 'blog_search_history';
-const MAX_HISTORY_ITEMS = 10;
+const MAX_HISTORY_ITEMS = 5;
 
 export interface SearchHistoryItem {
   query: string;

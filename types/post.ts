@@ -8,6 +8,7 @@ export interface Post {
   type: PostType;
   thumbnailUrl: string | null;
   isPublished: boolean;
+  viewCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -18,6 +19,7 @@ export interface PostListItem {
   description: string | null;
   type: PostType;
   thumbnailUrl: string | null;
+  viewCount: number;
   createdAt: string;
   tags?: Array<{
     id: string;

@@ -21,6 +21,7 @@ export interface Database {
           type: 'TECH' | 'TROUBLESHOOTING' | 'PROJECT';
           thumbnail_url: string | null;
           is_published: boolean;
+          view_count: number;
           created_at: string;
           updated_at: string;
         };
@@ -32,6 +33,7 @@ export interface Database {
           type: 'TECH' | 'TROUBLESHOOTING' | 'PROJECT';
           thumbnail_url?: string | null;
           is_published?: boolean;
+          view_count?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -43,8 +45,35 @@ export interface Database {
           type?: 'TECH' | 'TROUBLESHOOTING' | 'PROJECT';
           thumbnail_url?: string | null;
           is_published?: boolean;
+          view_count?: number;
           created_at?: string;
           updated_at?: string;
+        };
+      };
+      post_views: {
+        Row: {
+          id: string;
+          post_id: string;
+          ip_address: string | null;
+          cookie_id: string | null;
+          user_id: string | null;
+          viewed_at: string;
+        };
+        Insert: {
+          id?: string;
+          post_id: string;
+          ip_address?: string | null;
+          cookie_id?: string | null;
+          user_id?: string | null;
+          viewed_at?: string;
+        };
+        Update: {
+          id?: string;
+          post_id?: string;
+          ip_address?: string | null;
+          cookie_id?: string | null;
+          user_id?: string | null;
+          viewed_at?: string;
         };
       };
       tags: {
