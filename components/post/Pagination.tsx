@@ -6,9 +6,10 @@ import Link from 'next/link';
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
+  basePath?: string;
 }
 
-export function Pagination({ currentPage, totalPages }: PaginationProps) {
+export function Pagination({ currentPage, totalPages, basePath }: PaginationProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -19,7 +20,9 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
     } else {
       params.set('page', page.toString());
     }
-    return `/?${params.toString()}`;
+    const path = basePath || '/';
+    const queryString = params.toString();
+    return queryString ? `${path}?${queryString}` : path;
   };
 
   if (totalPages <= 1) return null;
