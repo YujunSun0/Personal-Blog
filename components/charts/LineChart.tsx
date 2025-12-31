@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 interface LineChartProps {
   data: Array<{ date: string; value: number }>;
   width: number;
@@ -8,6 +10,7 @@ interface LineChartProps {
 }
 
 export function LineChart({ data, width, height, color = 'var(--color-primary)' }: LineChartProps) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   if (!data || data.length === 0) {
     return (
       <div
@@ -63,8 +66,11 @@ export function LineChart({ data, width, height, color = 'var(--color-primary)' 
     return `${date.getMonth() + 1}/${date.getDate()}`;
   };
 
+  // 그라데이션 ID 생성 (고유하게)
+  const gradientId = `gradient-${Math.random().toString(36).substr(2, 9)}`;
+
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto relative">
       <svg width={width} height={height} className="overflow-visible">
         {/* 그리드 라인 */}
         {tickValues.map((value, index) => {
@@ -144,14 +150,14 @@ export function LineChart({ data, width, height, color = 'var(--color-primary)' 
 
         {/* 영역 채우기 (그라데이션) */}
         <defs>
-          <linearGradient id={`gradient-${color}`} x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor={color} stopOpacity={0.3} />
-            <stop offset="100%" stopColor={color} stopOpacity={0.05} />
+          <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor={color} stopOpacity={0.15} />
+            <stop offset="100%" stopColor={color} stopOpacity={0.02} />
           </linearGradient>
         </defs>
         <path
           d={`${pathData} L ${points[points.length - 1].x} ${height - padding.bottom} L ${padding.left} ${height - padding.bottom} Z`}
-          fill={`url(#gradient-${color})`}
+          fill={`url(#${gradientId})`}
         />
 
         {/* 라인 */}
@@ -164,13 +170,85 @@ export function LineChart({ data, width, height, color = 'var(--color-primary)' 
           strokeLinejoin="round"
         />
 
+        {/* 호버 영역 (보이지 않는 큰 영역) */}
+        {points.map((point, index) => {
+          // 툴팁 위치 결정: 위쪽에 있으면 아래에, 아래쪽에 있으면 위에 표시
+          const tooltipHeight = 35;
+          const tooltipWidth = 80;
+          const tooltipOffset = 15;
+          const isTopHalf = point.y < height / 2;
+          const tooltipY = isTopHalf 
+            ? point.y + tooltipOffset + 10  // 아래쪽에 표시
+            : point.y - tooltipHeight - tooltipOffset;  // 위쪽에 표시
+          
+          return (
+            <g key={`hover-${index}`}>
+              <circle
+                cx={point.x}
+                cy={point.y}
+                r={20}
+                fill="transparent"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                style={{ cursor: 'pointer' }}
+              />
+              {/* 호버 시 표시되는 포인트 */}
+              {hoveredIndex === index && (
+                <>
+                  <circle
+                    cx={point.x}
+                    cy={point.y}
+                    r={6}
+                    fill={color}
+                    stroke="var(--color-bg-primary)"
+                    strokeWidth={3}
+                  />
+                  {/* 툴팁 */}
+                  <g>
+                    <rect
+                      x={point.x - tooltipWidth / 2}
+                      y={tooltipY}
+                      width={tooltipWidth}
+                      height={tooltipHeight}
+                      rx={4}
+                      fill="var(--color-bg-secondary)"
+                      stroke="var(--color-border)"
+                      strokeWidth={1}
+                      opacity={0.95}
+                    />
+                    <text
+                      x={point.x}
+                      y={tooltipY + 15}
+                      textAnchor="middle"
+                      fontSize="11"
+                      fill="var(--color-text-secondary)"
+                    >
+                      {formatDate(data[index].date)}
+                    </text>
+                    <text
+                      x={point.x}
+                      y={tooltipY + 30}
+                      textAnchor="middle"
+                      fontSize="14"
+                      fontWeight="bold"
+                      fill="var(--color-text-primary)"
+                    >
+                      {data[index].value.toLocaleString()}
+                    </text>
+                  </g>
+                </>
+              )}
+            </g>
+          );
+        })}
+
         {/* 데이터 포인트 */}
         {points.map((point, index) => (
           <circle
             key={`point-${index}`}
             cx={point.x}
             cy={point.y}
-            r={4}
+            r={hoveredIndex === index ? 0 : 4}
             fill={color}
             stroke="var(--color-bg-primary)"
             strokeWidth={2}

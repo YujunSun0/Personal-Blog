@@ -178,7 +178,7 @@ export async function getPostStats(postId: string): Promise<PostStats> {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // 어제 날짜 (00:00:00)
+  // 어제 날짜 (00:00:00) 
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
@@ -190,9 +190,10 @@ export async function getPostStats(postId: string): Promise<PostStats> {
   const yesterdayEnd = new Date(yesterday);
   yesterdayEnd.setHours(23, 59, 59, 999);
 
-  // 최근 7일 전 날짜
-  const sevenDaysAgo = new Date(today);
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  // 최근 7일 전 날짜 (오늘 포함 7일 = 6일 전부터 오늘까지)
+  const sixDaysAgo = new Date(today);
+  sixDaysAgo.setDate(sixDaysAgo.getDate() - 6);
+  sixDaysAgo.setHours(0, 0, 0, 0);
 
   // 전체 조회수
   const { count: total, error: totalError } = await supabase
@@ -228,33 +229,44 @@ export async function getPostStats(postId: string): Promise<PostStats> {
     throw new Error(`Failed to fetch yesterday views: ${yesterdayError.message}`);
   }
 
-  // 최근 7일 일별 조회수
+  // 최근 7일 일별 조회수 (6일 전부터 오늘까지)
   const { data: weeklyData, error: weeklyError } = await supabase
     .from('post_views')
     .select('viewed_at')
     .eq('post_id', postId)
-    .gte('viewed_at', sevenDaysAgo.toISOString())
+    .gte('viewed_at', sixDaysAgo.toISOString())
+    .lte('viewed_at', todayEnd.toISOString())
     .order('viewed_at', { ascending: true });
 
   if (weeklyError) {
     throw new Error(`Failed to fetch weekly stats: ${weeklyError.message}`);
   }
 
+  // 날짜를 YYYY-MM-DD 형식으로 변환 (로컬 시간 기준)
+  const formatDateString = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // 일별로 그룹화
   const weeklyStatsMap = new Map<string, number>();
   (weeklyData || []).forEach((view) => {
     const viewData = view as Pick<PostViewsRow, 'viewed_at'>;
-    const date = new Date(viewData.viewed_at).toISOString().split('T')[0]; // YYYY-MM-DD
-    const count = weeklyStatsMap.get(date) || 0;
-    weeklyStatsMap.set(date, count + 1);
+    // UTC 시간을 로컬 시간으로 변환 후 날짜 추출
+    const viewDate = new Date(viewData.viewed_at);
+    const dateStr = formatDateString(viewDate);
+    const count = weeklyStatsMap.get(dateStr) || 0;
+    weeklyStatsMap.set(dateStr, count + 1);
   });
 
-  // 최근 7일 날짜 배열 생성 (빈 날짜도 포함)
+  // 최근 7일 날짜 배열 생성 (6일 전부터 오늘까지, 오늘 포함)
   const weeklyStats: PostStats['weeklyStats'] = [];
   for (let i = 6; i >= 0; i--) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = formatDateString(date);
     weeklyStats.push({
       date: dateStr,
       views: weeklyStatsMap.get(dateStr) || 0,
