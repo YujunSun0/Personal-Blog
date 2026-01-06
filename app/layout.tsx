@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://yujunsun-blog.vercel.app'),
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
         url: "/images/blog_banner.png",
         width: 1200,
         height: 630,
-        alt: "기술 블로그",
+        alt: "기술 블로그", 
       },
     ],
   },
@@ -68,6 +69,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <Toaster position="top-right" richColors />
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
