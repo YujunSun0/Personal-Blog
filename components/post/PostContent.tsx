@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -86,14 +87,40 @@ export function PostContent({ content, thumbnailUrl, title }: PostContentProps) 
           pre: ({ node, ...props }) => (
             <pre className="mb-4 rounded-lg overflow-x-auto whitespace-pre" {...props} />
           ),
-          a: ({ node, ...props }) => (
-            <a
-              className="text-blue-600 hover:text-blue-700 underline"
-              target="_blank"
-              rel="noopener noreferrer"
-              {...props}
-            />
-          ),
+          a: ({ node, href, ...props }: any) => {
+            // 앵커 링크인 경우 (같은 페이지 내 링크)
+            const isAnchorLink = href && href.startsWith('#');
+            
+            const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+              if (isAnchorLink) {
+                e.preventDefault();
+                const targetId = href.substring(1); // # 제거
+                const targetElement = document.getElementById(targetId);
+                
+                if (targetElement) {
+                  // 부드러운 스크롤
+                  targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                  });
+                  
+                  // URL 업데이트 (뒤로가기 지원)
+                  window.history.pushState(null, '', `#${targetId}`);
+                }
+              }
+            };
+            
+            return (
+              <a
+                className="text-blue-600 hover:text-blue-700 underline"
+                href={href}
+                onClick={handleClick}
+                target={isAnchorLink ? undefined : '_blank'}
+                rel={isAnchorLink ? undefined : 'noopener noreferrer'}
+                {...props}
+              />
+            );
+          },
           img: ({ node, ...props }) => (
             <img className="max-w-full h-auto rounded-lg my-4" {...props} />
           ),
