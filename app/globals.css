@@ -138,6 +138,9 @@ body {
     sans-serif;
   line-height: 1.6;
   transition: background-color 0.5s ease, color 0.5s ease;
+  /* 텍스트 줄바꿈: 기본적으로 keep-all 적용 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 /* 모든 요소의 색상 전환 부드럽게 */
@@ -147,6 +150,60 @@ body {
               border-color 0.5s ease,
               fill 0.5s ease,
               stroke 0.5s ease;
+}
+
+/* 텍스트 줄바꿈: 모든 텍스트 요소에 적용 */
+/* 상속되지 않는 요소들 명시적 적용 */
+button,
+input,
+textarea,
+select,
+a,
+label,
+span,
+div {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 제목 요소들 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 리스트, 테이블 요소 */
+li,
+td,
+th,
+dd,
+dt {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 예외: 코드 관련 요소는 일반 줄바꿈 사용 */
+code:not(pre code),
+pre,
+kbd,
+samp,
+.hljs,
+.highlight {
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* 예외: 특정 UI 요소에서 줄바꿈 방지 (필요시 사용) */
+.text-nowrap,
+.nowrap {
+  word-break: normal;
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 /* 이미지와 비디오는 제외 (성능 최적화) */
